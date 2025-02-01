@@ -62,6 +62,11 @@ jobs:
   azure-deploy:
     needs: image-build-push
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write # ??
+
     steps:
       - name: Checkout repository
         id: checkout
@@ -70,10 +75,13 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          creds: |
+            {
+              "clientSecret":  "${{ secrets.AZURE_CLIENT_SECRET }}"
+              "subscriptionId":  "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+              "tenantId":  "${{ vars.AZURE_TENANT_ID }}"
+              "clientId":  "${{ vars.AZURE_CLIENT_ID }}"
+            }
 
       - name: Bicep ${{ github.event_name == 'pull_request' && 'Validate' || 'Deploy' }}
         id: deploy-bicep
