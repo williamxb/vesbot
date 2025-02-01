@@ -91,7 +91,7 @@ jobs:
           operation: ${{ github.event_name == 'pull_request' && 'validate' || 'create' }}
           name: ${{ env.AZURE_RESOURCE_GROUP }}-${{ github.event_name == 'pull_request' && 'pr' || 'main' }}-${{ github.run_number }}
           scope: resourceGroup
-          subscription: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           resource-group-name: 'vesbot' # TODO: var
           template-file: .github/bicep/container-app-deployment.bicep
           parameters: | 
