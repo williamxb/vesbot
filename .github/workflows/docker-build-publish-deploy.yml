@@ -39,14 +39,14 @@ jobs:
       - name: Generate image tags
         id: generate-image-tags
         run: |
-          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}"
+          IMAGE_FULL_NAME="${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}"
 
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # PR builds get :pr-{number}
-            TAGS="${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}"
+            TAGS="${IMAGE_FULL_NAME}:pr-${{ github.event.number }}"
           else
             # Production builds get :latest and :sha-{hash}
-            TAGS="${{ env.IMAGE_NAME }}:latest,${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
+            TAGS="${IMAGE_FULL_NAME}:latest,${IMAGE_FULL_NAME}:sha-${{ github.sha }}"
           fi
           
           echo "Generated tags: $TAGS"
