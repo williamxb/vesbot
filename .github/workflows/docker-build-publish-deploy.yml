@@ -11,6 +11,7 @@ on:
 env:
   REGISTRY: ghcr.io
   AZURE_RESOURCE_GROUP: vesbot
+  IMAGE_NAME: vesbot
 
 jobs:
   image-build-push:
@@ -40,10 +41,10 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # PR builds get :pr-{number}
-            TAGS="${IMAGE_NAME}:pr-${{ github.event.number }}"
+            TAGS="${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}"
           else
             # Production builds get :latest and :sha-{hash}
-            TAGS="${IMAGE_NAME}:latest,${IMAGE_NAME}:sha-${{ github.sha }}"
+            TAGS="${{ env.IMAGE_NAME }}:latest,${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
           fi
           
           echo "Generated tags: $TAGS"
@@ -88,7 +89,7 @@ jobs:
               "registry": "ghcr.io",
               "registryUsername": "${{ github.actor }}",
               "registryPassword": "${{ secrets.GHCR_READ }}",
-              "imageName": "vesbot",
+              "imageName": "${{ env.IMAGE_NAME }}",
               "imageTag": "${{ needs.image-build-push.outputs.TAGS }}",
               "discordAppId": "${{ vars.DISCORD_APP_ID }}",
               "discordAppToken": "${{ secrets.DISCORD_APP_TOKEN }}"
