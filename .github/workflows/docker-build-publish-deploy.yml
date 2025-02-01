@@ -1,0 +1,92 @@
+name: Docker Build, Publish and Deploy to Azure Container App
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  AZURE_RESOURCE_GROUP: vesbot
+
+jobs:
+  image-build-push:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: read
+        packages: write
+        id-token: write
+
+    outputs:
+      TAGS: ${{ steps.generate-image-tags.outputs.TAGS }}
+
+    steps:
+      - name: Checkout repository
+        id: checkout
+        uses: actions/checkout@v2
+    
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+            registry: ${{ env.REGISTRY }}
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+    
+      - name: Generate image tags
+        id: generate-image-tags
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # PR builds get :pr-{number}
+            TAGS="${IMAGE_NAME}:pr-${{ github.event.number }}"
+          else
+            # Production builds get :latest and :sha-{hash}
+            TAGS="${IMAGE_NAME}:latest,${IMAGE_NAME}:sha-${{ github.sha }}"
+          fi
+          
+          echo "Generated tags: $TAGS"
+          echo "TAGS=${TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.generate-image-tags.outputs.TAGS }}
+    
+  azure-deploy:
+    needs: image-build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        id: checkout
+        uses: actions/checkout@v4
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+
+      - name: Bicep ${{ github.event_name == 'pull_request' && 'Validate' || 'Deploy' }}
+        id: deploy-bicep
+        uses: azure/bicep-deploy@v1
+        with:
+          type: deployment
+          operation: ${{ github.event_name == 'pull_request' && 'validate' || 'create' }}
+          name: ${{ env.AZURE_RESOURCE_GROUP }}-${{ github.event_name == 'pull_request' && 'pr' || 'main' }}-${{ github.run_number }}
+          scope: resourceGroup
+          subscription: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: 'vesbot' # TODO: var
+          template-file: .github/bicep/container-app-deployment.bicep
+          parameters: | 
+            {
+              "containerAppName": "vesbot",
+              "registry": "ghcr.io",
+              "registryUsername": "${{ github.actor }}",
+              "registryPassword": "${{ secrets.GHCR_READ }}",
+              "imageName": "vesbot",
+              "imageTag": "${{ needs.image-build-push.outputs.TAGS }}",
+              "discordAppId": "${{ vars.DISCORD_APP_ID }}",
+              "discordAppToken": "${{ secrets.DISCORD_APP_TOKEN }}"
+            }
