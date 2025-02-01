@@ -39,7 +39,7 @@ jobs:
       - name: Generate image tags
         id: generate-image-tags
         run: |
-          IMAGE_FULL_NAME="${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}"
+          IMAGE_FULL_NAME="${{ env.REGISTRY }}/${{ github.repository }}"
 
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # PR builds get :pr-{number}
