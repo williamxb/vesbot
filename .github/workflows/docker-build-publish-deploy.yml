@@ -70,6 +70,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
