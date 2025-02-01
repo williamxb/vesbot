@@ -77,10 +77,10 @@ jobs:
         with:
           creds: |
             {
-              "clientSecret":  "${{ secrets.AZURE_CLIENT_SECRET }}"
-              "subscriptionId":  "${{ vars.AZURE_SUBSCRIPTION_ID }}"
-              "tenantId":  "${{ vars.AZURE_TENANT_ID }}"
-              "clientId":  "${{ vars.AZURE_CLIENT_ID }}"
+              "tenantId":  "${{ vars.AZURE_TENANT_ID }}",
+              "subscriptionId":  "${{ vars.AZURE_SUBSCRIPTION_ID }}",
+              "clientId":  "${{ vars.AZURE_CLIENT_ID }}",
+              "clientSecret":  "${{ secrets.AZURE_CLIENT_SECRET }}",
             }
 
       - name: Bicep ${{ github.event_name == 'pull_request' && 'Validate' || 'Deploy' }}
