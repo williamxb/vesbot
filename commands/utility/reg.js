@@ -134,8 +134,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle(`${vehicle.year} ${vehicle.make} ${vehicle.model}`)
       .setDescription(`${vehicle.derivativeShort}`)
-      .addFields({ name: 'Vehicle Status', value: `${vehicleStatus}`, inline: true }, { name: 'VIN', value: `${vehicle.vin}`, inline: false })
-      .setThumbnail('https://cdn.discordapp.com/attachments/898978000000000000/899000000000000000/autotrader.png')
+      .addFields({ name: "Vehicle Status", value: `${vehicleStatus}`, inline: true }, { name: "VIN", value: `${vehicle.vin}`, inline: false })
       .setFooter({ text: `${registration.toUpperCase()}` })
       .setColor(embedColour);
 
