@@ -4,20 +4,8 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const vinUrl = process.env.VIN;
 
 const atHeaders = {
-  'accept': '*/*',
-  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'content-type': 'application/json',
-  'priority': 'u=1, i',
-  'sec-ch-ua': '"Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"',
-  'sec-ch-ua-mobile': '?0',
-  'sec-ch-ua-platform': '"Windows"',
-  'sec-fetch-dest': 'empty',
-  'sec-fetch-mode': 'cors',
-  'sec-fetch-site': 'same-origin',
-  'x-sauron-app-name': 'paygo-app',
-  'x-sauron-app-version': '91e4424e57',
-  'Referer': 'https://www.autotrader.co.uk/selling/find-car',
-  'Referrer-Policy': 'origin-when-cross-origin',
+  accept: "application/json",
+  "content-type": "application/json",
 };
 
 function atBody(registration) {
