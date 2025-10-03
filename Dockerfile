@@ -21,8 +21,5 @@ USER node
 # Copy the rest of the source files into the image.
 COPY . .
 
-# Update slash commands.
-RUN ["node", "update-commands.js"]
-
 # Start the bot.
 CMD ["node", "index.js"]
