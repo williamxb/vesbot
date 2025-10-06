@@ -1,5 +1,6 @@
 services:
-  server:
+  vesbot:
+    container_name: vesbot
     build:
       context: .
     environment:
