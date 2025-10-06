@@ -4,8 +4,11 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const vinUrl = process.env.VIN;
 
 const atHeaders = {
-  accept: "application/json",
+  accept: "*/*",
+  "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
   "content-type": "application/json",
+  Referer: "https://www.autotrader.co.uk/selling/find-car",
+  "Referrer-Policy": "origin-when-cross-origin",
 };
 
 function atBody(registration) {
