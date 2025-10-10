@@ -271,6 +271,15 @@ module.exports = {
           return colour;
       }
     }
+    let vehicleStatus, embedColour;
+    if (data.hpi) {
+      ({ vehicleStatus, embedColour } = createVehicleStatus(data.hpi));
+    } else {
+      vehicleStatus = "Unknown";
+      embedColour = 0x00b67a;
+    }
+    embedData.vehicleStatus = vehicleStatus;
+    embedData.embedColour = embedColour;
     const embed = new EmbedBuilder()
       .setTitle(`${data.yearOfManufacture} ${data.make} ${data.model}`)
       .setDescription(`${data.derivativeShort}`)
