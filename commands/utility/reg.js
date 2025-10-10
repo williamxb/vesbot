@@ -83,6 +83,33 @@ function createVehicleStatus(vehicle) {
 }
 
 // API fetch functions
+async function fetchEuro(registration) {
+  const url = "https://hpicheck.com/api/euro-status";
+  const headers = {
+    Accept: "application/json",
+    "Accept-Language": "en-GB,en;q=0.9",
+    "Content-Type": "application/x-www-form-urlencoded",
+    Priority: "u=3, i",
+    "User-Agent": "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
+  };
+  const body = `vrm=${registration}`;
+
+  const response = await fetch(url, { headers, method: "POST", body });
+
+  if (!response.ok) {
+    throw new Error(response.status);
+  }
+
+  const data = await response.json();
+
+  // no data found. api returns 200 regardless of data
+  if (data.error) {
+    throw new Error("No data found");
+  }
+
+  return await data;
+}
+
 async function fetchVES(registration) {
   const url = `https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles`;
   const headers = {
@@ -159,13 +186,7 @@ async function fetchVIN(registration) {
 
 // Collect data from all APIs
 async function fetchVehicleData(registration) {
-  const results = await Promise.allSettled([
-    // In order of priority. Best data last.
-    fetchMOT(registration), // MOT API
-    fetchVES(registration), // VES API
-    fetchVIN(registration), // VIN API
-    fetchAT(registration), //  AT API
-  ]);
+  const results = await Promise.allSettled([fetchEuro(registration), fetchMOT(registration), fetchVES(registration), fetchVIN(registration), fetchAT(registration)]);
 
   const successful = [];
   const failed = [];
