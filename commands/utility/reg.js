@@ -185,34 +185,33 @@ async function fetchVIN(registration) {
 }
 
 // Collect data from all APIs
+let listApiStatus = "";
 async function fetchVehicleData(registration) {
   const results = await Promise.allSettled([fetchEuro(registration), fetchMOT(registration), fetchVES(registration), fetchVIN(registration), fetchAT(registration)]);
 
-  const successful = [];
-  const failed = [];
+  const successful = {};
+  const failed = {};
 
-  results.forEach((result, index) => {
+  results.forEach((result, i) => {
+    const apiName = ["euro", "mot", "ves", "vin", "hpi"];
+
     if (result.status === "fulfilled") {
-      successful.push({ api: index + 1, data: result.value });
+      successful[apiName[i]] = result.value;
     } else {
-      failed.push({ api: index + 1, error: result.reason });
-      notify("warning", `API ${index + 1} failed: ${result.reason.message}`);
+      failed[`api${i + 1}`] = result.reason.message;
+      listApiStatus += ` • ${apiName[i]} ${result.reason.message}`;
+      notify("warning", `${apiName[i]} failed for ${registration}: ${result.reason.message}`);
     }
   });
 
-  // notify if everything failed
-  if (successful.length === 0) {
+  console.log(`${registration} ${Object.keys(successful).length}/${Object.keys(failed).length} ${listApiStatus}`);
+
+  if (Object.keys(successful).length === 0) {
     notify("critical", "All APIs failed for vehicle " + registration);
-    return null;
-    // throw new Error("No data available");
+    throw new Error("No data available");
   }
 
-  const merged = {};
-  successful.forEach(({ data }) => {
-    Object.assign(merged, data);
-  });
-
-  return merged;
+  return successful;
 }
 
 // Embed builder and command handler
