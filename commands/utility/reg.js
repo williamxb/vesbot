@@ -303,11 +303,14 @@ module.exports = {
     }
     embedData.vehicleStatus = vehicleStatus;
     embedData.embedColour = embedColour;
+
+    const fields = [
+      { name: "Vehicle Status", value: `${embedData.vehicleStatus}`, inline: true },
+      { name: "VIN", value: `${embedData.vin}`, inline: false },
+    ];
+
     const embed = new EmbedBuilder()
-      .setTitle(`${data.yearOfManufacture} ${data.make} ${data.model}`)
-      .setDescription(`${data.derivativeShort}`)
-      .addFields({ name: "Vehicle Status", value: `${vehicleStatus}`, inline: true }, { name: "VIN", value: `${data.VIN}`, inline: false })
-      .setFooter({ text: `${registration.toUpperCase()}` })
+      .addFields(fields)
       .setColor(embedColour);
 
     return interaction.editReply({ embeds: [embed] });
