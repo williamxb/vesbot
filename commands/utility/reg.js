@@ -271,6 +271,29 @@ module.exports = {
           return colour;
       }
     }
+
+    let embedData = {
+      // @TODO: Sort in order of priority - best data first.
+      year: `${data.mot?.manufactureDate.split("-")[0]} ` || `${data.ves?.yearOfManufacture} ` || `${data.vin?.Year} ` || "", // add whitespace
+      make: data.mot?.make || data.ves?.make || data.vin?.Manufacturer || data.hpi?.make || "Unknown",
+      model: data.mot?.model || data.vin?.Model || data.hpi?.model || "Unknown",
+      trim: data.hpi?.derivativeShort || "No trim level found",
+      colour: calculateColour(data.ves?.colour || data.vin?.Colour) || "Unknown",
+      fuelType: data.mot?.fuelType || data.ves?.fuelType || "Unknown",
+      recall: data.mot?.hasOutstandingRecall || "Unknown",
+      vin: data.vin?.VIN || "Unknown",
+      hasTax: data.ves?.taxStatus || "Unknown",
+      taxDueDate: data.ves?.taxDueDate || "Unknown",
+      hasMot: data.ves?.motStatus || "Unknown",
+      motDueDate: data.ves?.motDueDate || "Unknown",
+      lastV5: data.ves?.dateOfLastV5CIssued || null,
+      vehicleStatus: "", // calculate
+      embedColour: "", // calculated
+      motRecentFails: "", // @TODO: calculate recent reasons for MOT refusal
+      taxCost: "", // @TODO: calculate tax based on year, engine size, co2
+      lez: "", // @TODO: calculate LEZ compliance with euro status
+    };
+
     let vehicleStatus, embedColour;
     if (data.hpi) {
       ({ vehicleStatus, embedColour } = createVehicleStatus(data.hpi));
