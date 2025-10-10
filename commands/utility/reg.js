@@ -1,6 +1,6 @@
 require("dotenv").config();
 const msal = require("@azure/msal-node");
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { InteractionContextType, SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 // @TODO: implement check for if MSAL client is required
 // MSAL setup for DVSA MOT API
@@ -220,7 +220,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("reg")
     .setDescription("Check vehicle details and status")
-    .addStringOption((option) => option.setName("registration").setDescription("Enter vehicle registration").setRequired(true)),
+    .addStringOption((option) => option.setName("registration").setDescription("Enter vehicle registration").setRequired(true))
+    .setContexts(InteractionContextType.Guild, InteractionContextType.PrivateChannel),
 
   async execute(interaction) {
     // acknowledge interaction
