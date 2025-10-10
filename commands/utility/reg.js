@@ -310,7 +310,11 @@ module.exports = {
     ];
 
     const embed = new EmbedBuilder()
+      .setTimestamp()
+      .setTitle(`${embedData.colour} ${embedData.year}${embedData.make} ${embedData.model}`)
+      .setDescription(`${embedData.trim}`)
       .addFields(fields)
+      .setFooter({ text: `${registration} ${listApiStatus}` })
       .setColor(embedColour);
 
     return interaction.editReply({ embeds: [embed] });
