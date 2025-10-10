@@ -247,9 +247,30 @@ module.exports = {
       return interaction.editReply({ embeds: [embed] });
     }
 
-    const { vehicleStatus, embedColour } = createVehicleStatus(data);
-
-    // @TODO: This relies on every API being successful. Fix. Build embed dynamically based on available data.
+    function calculateColour(colour) {
+      switch (colour) {
+        case "WHITE":
+          return "⚪️";
+        case "BLACK":
+          return "⚫️";
+        case "RED":
+          return "🔴";
+        case "BLUE":
+          return "🔵";
+        case "BROWN":
+          return "🟤";
+        case "ORANGE":
+          return "🟠";
+        case "GREEN":
+          return "🟢";
+        case "YELLOW":
+          return "🟡";
+        case "PURPLE":
+          return "🟣";
+        default:
+          return colour;
+      }
+    }
     const embed = new EmbedBuilder()
       .setTitle(`${data.yearOfManufacture} ${data.make} ${data.model}`)
       .setDescription(`${data.derivativeShort}`)
