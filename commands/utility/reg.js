@@ -303,10 +303,62 @@ module.exports = {
     embedData.vehicleStatus = vehicleStatus;
     embedData.embedColour = embedColour;
 
+    let motDefectsSummary = "";
+
+    const currentYear = new Date().getFullYear();
+    for (let test = 0; test < data.mot.motTests?.length; test++) {
+      const testYear = parseInt(data.mot.motTests[test].completedDate.split("-")[0], 10);
+      if (currentYear - testYear > 5) {
+        break; // Stop processing tests older than 5 years
+      }
+      const year = data.mot.motTests[test].completedDate.split("-")[0];
+      const defects = data.mot.motTests[test].defects;
+
+      const defectCounts = {};
+
+      for (let defect of defects) {
+        if (defect.type == "MAJOR" || defect.type == "DANGEROUS" || defect.type == "PRS") {
+          const categoryDescriptors = {
+            "(0": "Identification of the vehicle",
+            "(1": "Brakes",
+            "(2": "Steering",
+            "(3": "Visibility",
+            "(4": "Lamps, reflectors and electrical equipment",
+            "(5": "Axles, wheels, tyres and suspension",
+            "(6": "Body, structure and attachments",
+            "(7": "SRS, ESC, electrical equipment",
+            "(8": "Noise, emissions, EML",
+            "(9": "Supplementary tests for buses and coaches",
+          };
+          const categoryMatch = defect.text.match(/\(0|\(1|\(2|\(3|\(4|\(5|\(6|\(7|\(8|\(9/i);
+          const category = categoryMatch ? categoryDescriptors[categoryMatch[0]] || "Other" : "Other";
+        }
+      }
+
+      const defectSummary = Object.entries(defectCounts)
+        .map(([category, count]) => `${count}x ${category}`)
+        .join(", ");
+
+      if (defectSummary) {
+        motDefectsSummary += `${year} - ${defectSummary}\n`;
+      }
+    }
+
+    embedData.motRecentFails = motDefectsSummary.trim();
+
+    console.log(embedData.motRecentFails);
+    console.log(data.mot.motTests[0]);
+    console.log(data.mot.motTests[1]);
+    console.log(data.mot.motTests[2]);
+
     const fields = [
-      { name: "Vehicle Status", value: `${embedData.vehicleStatus}`, inline: true },
-      { name: "VIN", value: `${embedData.vin}`, inline: false },
+      { name: "Vehicle Status", value: embedData.vehicleStatus, inline: true },
+      { name: "VIN", value: embedData.vin, inline: true },
     ];
+
+    if (embedData.motRecentFails) {
+      fields.push({ name: "Last 5 years:", value: embedData.motRecentFails, inline: false });
+    }
 
     const embed = new EmbedBuilder()
       .setTimestamp()
