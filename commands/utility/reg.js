@@ -332,6 +332,7 @@ module.exports = {
           };
           const categoryMatch = defect.text.match(/\(0|\(1|\(2|\(3|\(4|\(5|\(6|\(7|\(8|\(9/i);
           const category = categoryMatch ? categoryDescriptors[categoryMatch[0]] || "Other" : "Other";
+          defectCounts[category] = (defectCounts[category] || 0) + 1;
         }
       }
 
