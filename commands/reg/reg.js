@@ -2,6 +2,7 @@ require('dotenv').config();
 const { InteractionContextType, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { validateRegistration, sanitiseInput } = require('../../helpers/validation');
 const { getAccessToken } = require('../../helpers/msal');
+const { calculateColour, createVehicleStatus } = require('../../helpers/formatting');
 
 // Notification functionality
 function notify(severity, message) {
@@ -43,18 +44,7 @@ function notify(severity, message) {
       }),
     });
   } catch (error) {
-    console.error("Error sending notification:", error);
-  }
-}
-
-// Create vehicle status for embed
-// @TODO: ? move this to the AT function
-function createVehicleStatus(vehicle) {
-  if (vehicle.stolen == false && vehicle.scrapped == false && vehicle.writeOffCategory == "none") {
-    return { vehicleStatus: "Clean ✨", embedColour: 0x00b67a };
-  } else {
-    const status = [vehicle.stolen ? "**Stolen**" : null, vehicle.scrapped ? "**Scrapped**" : null, vehicle.writeOffCategory !== "none" ? `**Write-off - CAT ${vehicle.writeOffCategory}**` : null].filter(Boolean).join(", ");
-    return { vehicleStatus: status, embedColour: 0xb11212 };
+    console.error('Error sending notification:', error);
   }
 }
 
@@ -218,31 +208,6 @@ module.exports = {
       return interaction.editReply({ embeds: [embed] });
     }
 
-    function calculateColour(colour) {
-      switch (colour) {
-        case "WHITE":
-          return "⚪️";
-        case "BLACK":
-          return "⚫️";
-        case "RED":
-          return "🔴";
-        case "BLUE":
-          return "🔵";
-        case "BROWN":
-          return "🟤";
-        case "ORANGE":
-          return "🟠";
-        case "GREEN":
-          return "🟢";
-        case "YELLOW":
-          return "🟡";
-        case "PURPLE":
-          return "🟣";
-        default:
-          return colour;
-      }
-    }
-
     let embedData = {
       // @TODO: Sort in order of priority - best data first.
       year: `${data.mot?.manufactureDate.split("-")[0]} ` || `${data.ves?.yearOfManufacture} ` || `${data.vin?.Year} ` || "", // add whitespace
@@ -265,17 +230,9 @@ module.exports = {
       lez: "", // @TODO: calculate LEZ compliance with euro status
     };
 
-    let vehicleStatus, embedColour;
-    if (data.hpi) {
-      ({ vehicleStatus, embedColour } = createVehicleStatus(data.hpi));
-    } else {
-      vehicleStatus = "Unknown";
-      embedColour = 0x00b67a;
-    }
-    embedData.vehicleStatus = vehicleStatus;
-    embedData.embedColour = embedColour;
+    Object.assign(embedData, createVehicleStatus(data?.hpi));
 
-    let motDefectsSummary = "";
+    let motDefectsSummary = '';
 
     const currentYear = new Date().getFullYear();
     for (let test = 0; test < data.mot.motTests?.length; test++) {
@@ -334,7 +291,7 @@ module.exports = {
       .setDescription(`${embedData.trim}`)
       .addFields(fields)
       .setFooter({ text: `${registration} ${listApiStatus}` })
-      .setColor(embedColour);
+      .setColor(embedData.embedColour);
 
     return interaction.editReply({ embeds: [embed] });
   },
