@@ -7,15 +7,15 @@ const { calculateColour, createVehicleStatus } = require('../../helpers/formatti
 // Notification functionality
 function notify(severity, message) {
   const notificationUrl = process.env.DISCORD_NOTIFICATION_WEBHOOK_URL;
-  let colour = "";
+  let colour = '';
   switch (severity) {
-    case "critical":
+    case 'critical':
       colour = 0xff0000;
       break;
-    case "warning":
+    case 'warning':
       colour = 0xffa500;
       break;
-    case "info":
+    case 'info':
       colour = 0x0000ff;
       break;
     default:
@@ -25,7 +25,7 @@ function notify(severity, message) {
   const embed = new EmbedBuilder()
     .setColor(colour)
     .setFooter({
-      text: "vesbot",
+      text: 'vesbot',
     })
     .setTimestamp(new Date())
     .setFields({
@@ -36,8 +36,8 @@ function notify(severity, message) {
 
   try {
     fetch(notificationUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         content: null,
         embeds: [embed],
@@ -50,17 +50,14 @@ function notify(severity, message) {
 
 // API fetch functions
 async function fetchEuro(registration) {
-  const url = "https://hpicheck.com/api/euro-status";
+  const url = 'https://hpicheck.com/api/euro-status';
   const headers = {
-    Accept: "application/json",
-    "Accept-Language": "en-GB,en;q=0.9",
-    "Content-Type": "application/x-www-form-urlencoded",
-    Priority: "u=3, i",
-    "User-Agent": "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
+    'accept': 'application/json',
+    'user-agent': 'Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)',
   };
   const body = `vrm=${registration}`;
 
-  const response = await fetch(url, { headers, method: "POST", body });
+  const response = await fetch(url, { headers, method: 'POST', body });
 
   if (!response.ok) {
     throw new Error(response.status);
@@ -70,7 +67,7 @@ async function fetchEuro(registration) {
 
   // no data found. api returns 200 regardless of data
   if (data.error) {
-    throw new Error("No data found");
+    throw new Error('No data found');
   }
 
   return await data;
@@ -79,12 +76,12 @@ async function fetchEuro(registration) {
 async function fetchVES(registration) {
   const url = `https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles`;
   const headers = {
-    accept: "application/json",
-    "x-api-key": process.env.VES_API_KEY,
+    'accept': 'application/json',
+    'x-api-key': process.env.VES_API_KEY,
   };
   const body = { registrationNumber: registration };
 
-  const response = await fetch(url, { headers, method: "POST", body: JSON.stringify(body) });
+  const response = await fetch(url, { headers, method: 'POST', body: JSON.stringify(body) });
 
   if (!response.ok) {
     throw new Error(response.status);
@@ -97,9 +94,9 @@ async function fetchMOT(registration) {
   const token = await getAccessToken();
   const url = `https://history.mot.api.gov.uk/v1/trade/vehicles/registration/${registration}`;
   const headers = {
-    accept: "application/json",
-    Authorization: `Bearer ${token}`,
-    "X-API-KEY": process.env.MOT_API_KEY,
+    'accept': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'X-API-KEY': process.env.MOT_API_KEY,
   };
 
   const response = await fetch(url, { headers });
@@ -115,17 +112,16 @@ async function fetchMOT(registration) {
 }
 
 async function fetchAT(registration) {
-  const url = "https://www.autotrader.co.uk/at-gateway?opname=VrmLookupQuery";
+  const url = 'https://www.autotrader.co.uk/at-gateway?opname=VrmLookupQuery';
   const headers = {
-    accept: "*/*",
-    "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-    "content-type": "application/json",
-    Referer: "https://www.autotrader.co.uk/selling/find-car",
-    "Referrer-Policy": "origin-when-cross-origin",
+    'accept': '*/*',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    'content-type': 'application/json',
+    'Referer': 'https://www.autotrader.co.uk/selling/find-car',
+    'Referrer-Policy': 'origin-when-cross-origin',
   };
   const body = `{"operationName":"VrmLookupQuery","variables":{"vrm":"${registration}"},"query":"query VrmLookupQuery($vrm: String!) {\\n  vehicle {\\n    vrmLookup(registration: $vrm) {\\n      make\\n      model\\n      derivativeShort\\n      derivativeId\\n      vehicleType\\n      scrapped\\n      stolen\\n      writeOffCategory\\n      }\\n  }\\n}\\n"}`;
-
-  const response = await fetch(url, { headers, method: "POST", body });
+  const response = await fetch(url, { headers, method: 'POST', body });
 
   if (!response.ok) {
     throw new Error(response.status);
@@ -133,7 +129,7 @@ async function fetchAT(registration) {
 
   const data = await response.json();
   if (data.data.vehicle.vrmLookup === null) {
-    throw new Error("No data found");
+    throw new Error('No data found');
   }
 
   return await data.data.vehicle.vrmLookup;
@@ -151,7 +147,7 @@ async function fetchVIN(registration) {
 }
 
 // Collect data from all APIs
-let listApiStatus = "";
+let listApiStatus = '';
 async function fetchVehicleData(registration) {
   const results = await Promise.allSettled([fetchEuro(registration), fetchMOT(registration), fetchVES(registration), fetchVIN(registration), fetchAT(registration)]);
 
@@ -159,22 +155,22 @@ async function fetchVehicleData(registration) {
   const failed = {};
 
   results.forEach((result, i) => {
-    const apiName = ["euro", "mot", "ves", "vin", "hpi"];
+    const apiName = ['euro', 'mot', 'ves', 'vin', 'hpi'];
 
-    if (result.status === "fulfilled") {
+    if (result.status === 'fulfilled') {
       successful[apiName[i]] = result.value;
     } else {
       failed[`api${i + 1}`] = result.reason.message;
       listApiStatus += ` • ${apiName[i]} ${result.reason.message}`;
-      notify("warning", `${apiName[i]} failed for ${registration}: ${result.reason.message}`);
+      notify('warning', `${apiName[i]} failed for ${registration}: ${result.reason.message}`);
     }
   });
 
   console.log(`${registration} ${Object.keys(successful).length}/${Object.keys(failed).length} ${listApiStatus}`);
 
   if (Object.keys(successful).length === 0) {
-    notify("critical", "All APIs failed for vehicle " + registration);
-    throw new Error("No data available");
+    notify('critical', 'All APIs failed for vehicle ' + registration);
+    throw new Error('No data available');
   }
 
   return successful;
@@ -183,10 +179,10 @@ async function fetchVehicleData(registration) {
 // Embed builder and command handler
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("reg")
-    .setDescription("Check vehicle details and status")
-    .addStringOption((option) => option.setName("registration").setDescription("Enter vehicle registration").setRequired(true))
-    .setContexts(InteractionContextType.Guild, InteractionContextType.PrivateChannel),
+    .setName('reg')
+    .setDescription('Check vehicle details and status')
+    .addStringOption((option) => option.setName('registration').setDescription('Enter vehicle registration').setRequired(true))
+    .setContexts(InteractionContextType.Guild, InteractionContextType.PrivateChannel, InteractionContextType.BotDM),
 
   async execute(interaction) {
     // acknowledge interaction
@@ -196,7 +192,7 @@ module.exports = {
 
     if (!validateRegistration(registration)) {
       // Input failed validation
-      let embed = new EmbedBuilder().setTitle(`Registration failed validation.`).addFields({ name: "Registration", value: registration, inline: true }).setColor(0xff0000);
+      let embed = new EmbedBuilder().setTitle(`Registration failed validation.`).addFields({ name: 'Registration', value: registration, inline: true }).setColor(0xff0000);
       return interaction.editReply({ embeds: [embed] });
     }
 
@@ -204,70 +200,72 @@ module.exports = {
 
     if (data === null) {
       // Registration does not exist
-      const embed = new EmbedBuilder().setTitle(`Vehicle not found.`).addFields({ name: "Is the registration correct?", value: registration, inline: true }).setColor(0xff0000);
+      const embed = new EmbedBuilder().setTitle(`Vehicle not found.`).addFields({ name: 'Is the registration correct?', value: registration, inline: true }).setColor(0xff0000);
       return interaction.editReply({ embeds: [embed] });
     }
 
     let embedData = {
       // @TODO: Sort in order of priority - best data first.
-      year: `${data.mot?.manufactureDate.split("-")[0]} ` || `${data.ves?.yearOfManufacture} ` || `${data.vin?.Year} ` || "", // add whitespace
-      make: data.mot?.make || data.ves?.make || data.vin?.Manufacturer || data.hpi?.make || "Unknown",
-      model: data.mot?.model || data.vin?.Model || data.hpi?.model || "Unknown",
-      trim: data.hpi?.derivativeShort || "No trim level found",
-      colour: calculateColour(data.ves?.colour || data.vin?.Colour) || "Unknown",
-      fuelType: data.mot?.fuelType || data.ves?.fuelType || "Unknown",
-      recall: data.mot?.hasOutstandingRecall || "Unknown",
-      vin: data.vin?.VIN || "Unknown",
-      hasTax: data.ves?.taxStatus || "Unknown",
-      taxDueDate: data.ves?.taxDueDate || "Unknown",
-      hasMot: data.ves?.motStatus || "Unknown",
-      motDueDate: data.ves?.motDueDate || "Unknown",
+      year: `${data.mot?.manufactureDate.split('-')[0]} ` || `${data.ves?.yearOfManufacture} ` || `${data.vin?.Year} ` || '', // add whitespace
+      make: data.mot?.make || data.ves?.make || data.vin?.Manufacturer || data.hpi?.make || 'Unknown',
+      model: data.mot?.model || data.vin?.Model || data.hpi?.model || 'Unknown',
+      trim: data.hpi?.derivativeShort || 'No trim level found',
+      colour: calculateColour(data.ves?.colour || data.vin?.Colour) || 'Unknown',
+      fuelType: data.mot?.fuelType || data.ves?.fuelType || 'Unknown',
+      recall: data.mot?.hasOutstandingRecall || 'Unknown',
+      vin: `\`${data.vin?.VIN}\`` || 'Unknown',
+      hasTax: data.ves?.taxStatus || 'Unknown',
+      taxDueDate: data.ves?.taxDueDate || 'Unknown',
+      hasMot: data.ves?.motStatus || 'Unknown',
+      motDueDate: data.ves?.motDueDate || 'Unknown',
       lastV5: data.ves?.dateOfLastV5CIssued || null,
-      vehicleStatus: "", // calculate
-      embedColour: "", // calculated
-      motRecentFails: "", // @TODO: calculate recent reasons for MOT refusal
-      taxCost: "", // @TODO: calculate tax based on year, engine size, co2
-      lez: "", // @TODO: calculate LEZ compliance with euro status
+      vehicleStatus: '', // calculate
+      embedColour: '', // calculated
+      motRecentFails: '', // @TODO: calculate recent reasons for MOT refusal
+      taxCost: '', // @TODO: calculate tax based on year, engine size, co2
+      lez: '', // @TODO: calculate LEZ compliance with euro status
     };
 
     Object.assign(embedData, createVehicleStatus(data?.hpi));
+
+    console.log(data.hpi);
 
     let motDefectsSummary = '';
 
     const currentYear = new Date().getFullYear();
     for (let test = 0; test < data.mot.motTests?.length; test++) {
-      const testYear = parseInt(data.mot.motTests[test].completedDate.split("-")[0], 10);
+      const testYear = parseInt(data.mot.motTests[test].completedDate.split('-')[0], 10);
       if (currentYear - testYear > 5) {
         break; // Stop processing tests older than 5 years
       }
-      const year = data.mot.motTests[test].completedDate.split("-")[0];
+      const year = data.mot.motTests[test].completedDate.split('-')[0];
       const defects = data.mot.motTests[test].defects;
 
       const defectCounts = {};
 
       for (let defect of defects) {
-        if (defect.type == "MAJOR" || defect.type == "DANGEROUS" || defect.type == "PRS") {
+        if (defect.type == 'MAJOR' || defect.type == 'DANGEROUS' || defect.type == 'PRS') {
           const categoryDescriptors = {
-            "(0": "Identification of the vehicle",
-            "(1": "Brakes",
-            "(2": "Steering",
-            "(3": "Visibility",
-            "(4": "Lamps, reflectors and electrical equipment",
-            "(5": "Axles, wheels, tyres and suspension",
-            "(6": "Body, structure and attachments",
-            "(7": "SRS, ESC, electrical equipment",
-            "(8": "Noise, emissions, EML",
-            "(9": "Supplementary tests for buses and coaches",
+            '(0': 'Identification of the vehicle',
+            '(1': 'Brakes',
+            '(2': 'Steering',
+            '(3': 'Visibility',
+            '(4': 'Lamps, reflectors and electrical equipment',
+            '(5': 'Axles, wheels, tyres and suspension',
+            '(6': 'Body, structure and attachments',
+            '(7': 'SRS, ESC, electrical equipment',
+            '(8': 'Noise, emissions, EML',
+            '(9': 'Supplementary tests for buses and coaches',
           };
           const categoryMatch = defect.text.match(/\(0|\(1|\(2|\(3|\(4|\(5|\(6|\(7|\(8|\(9/i);
-          const category = categoryMatch ? categoryDescriptors[categoryMatch[0]] || "Other" : "Other";
+          const category = categoryMatch ? categoryDescriptors[categoryMatch[0]] || 'Other' : 'Other';
           defectCounts[category] = (defectCounts[category] || 0) + 1;
         }
       }
 
       const defectSummary = Object.entries(defectCounts)
         .map(([category, count]) => `${count}x ${category}`)
-        .join(", ");
+        .join(', ');
 
       if (defectSummary) {
         motDefectsSummary += `${year} - ${defectSummary}\n`;
@@ -277,12 +275,12 @@ module.exports = {
     embedData.motRecentFails = motDefectsSummary.trim();
 
     const fields = [
-      { name: "Vehicle Status", value: embedData.vehicleStatus, inline: true },
-      { name: "VIN", value: embedData.vin, inline: true },
+      { name: 'Vehicle Status', value: embedData.vehicleStatus, inline: true },
+      { name: 'VIN', value: embedData.vin, inline: true },
     ];
 
     if (embedData.motRecentFails) {
-      fields.push({ name: "Last 5 years:", value: embedData.motRecentFails, inline: false });
+      fields.push({ name: 'Last 5 years:', value: embedData.motRecentFails, inline: false });
     }
 
     const embed = new EmbedBuilder()
