@@ -347,11 +347,6 @@ module.exports = {
 
     embedData.motRecentFails = motDefectsSummary.trim();
 
-    console.log(embedData.motRecentFails);
-    console.log(data.mot.motTests[0]);
-    console.log(data.mot.motTests[1]);
-    console.log(data.mot.motTests[2]);
-
     const fields = [
       { name: "Vehicle Status", value: embedData.vehicleStatus, inline: true },
       { name: "VIN", value: embedData.vin, inline: true },
