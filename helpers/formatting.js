@@ -10,6 +10,7 @@
 function calculateColour(colour) {
   const colourMap = {
     WHITE: '⚪️',
+    SILVER: '⚪️',
     BLACK: '⚫️',
     RED: '🔴',
     BLUE: '🔵',
