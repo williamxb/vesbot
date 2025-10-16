@@ -1,6 +1,7 @@
 require("dotenv").config();
 const msal = require("@azure/msal-node");
 const { InteractionContextType, SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { validateRegistration, sanitiseInput } = require('../../helpers/validation');
 
 // @TODO: implement check for if MSAL client is required
 // MSAL setup for DVSA MOT API
@@ -62,13 +63,6 @@ function notify(severity, message) {
   } catch (error) {
     console.error("Error sending notification:", error);
   }
-}
-
-// Validate registration format
-function validateRegistration(registration) {
-  // https://gist.github.com/danielrbradley/7567269
-  const regex = /(^[A-Z]{2}[0-9]{2}\s?[A-Z]{3}$)|(^[A-Z][0-9]{1,3}[A-Z]{3}$)|(^[A-Z]{3}[0-9]{1,3}[A-Z]$)|(^[0-9]{1,4}[A-Z]{1,2}$)|(^[0-9]{1,3}[A-Z]{1,3}$)|(^[A-Z]{1,2}[0-9]{1,4}$)|(^[A-Z]{1,3}[0-9]{1,3}$)|(^[A-Z]{1,3}[0-9]{1,4}$)|(^[0-9]{3}[DX]{1}[0-9]{3}$)/i;
-  return regex.test(registration);
 }
 
 // Create vehicle status for embed
@@ -226,11 +220,7 @@ module.exports = {
     // acknowledge interaction
     await interaction.deferReply();
 
-    // Sanitize and validate input
-    const registration = interaction.options
-      .getString("registration") // grab user input
-      .replace(/[^a-zA-Z0-9]/g, "") // strip non-alphanumeric
-      .toUpperCase(); // convert to uppercase
+    const registration = sanitiseInput(interaction.options.getString('registration'));
 
     if (!validateRegistration(registration)) {
       // Input failed validation
