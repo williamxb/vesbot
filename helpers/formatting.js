@@ -132,7 +132,7 @@ function createTaxCost(ves, mot) {
 		} else {
 			taxCost = '£195';
 		}
-	} else if (compareDesc(regAfter2001, registrationDate) == 1) {
+	} else if (compareDesc(regAfter2001, registrationDate) === 1) {
 		if (!ves.co2Emissions) return { taxCost: 'Unknown' };
 
 		for (const rate of vedRates) {
@@ -143,7 +143,7 @@ function createTaxCost(ves, mot) {
 		}
 
 		if (
-			compareDesc(emissionsMarch2006Cutoff, registrationDate) == -1 &&
+			compareDesc(emissionsMarch2006Cutoff, registrationDate) === -1 &&
 			taxCost > 430
 		) {
 			taxCost = '(K) £430';
@@ -174,7 +174,7 @@ function createTaxStatus(vehicle) {
 	if (!vehicle.taxStatus) return { taxStatus: 'Unknown', taxDue: 'Unknown' };
 
 	const currentDate = new Date().setHours(24, 0, 0, 0);
-	let taxStatus = vehicle.taxStatus;
+	const taxStatus = vehicle.taxStatus;
 	let taxDue = 'Unknown'; // set default
 
 	if (vehicle.taxDueDate) {
@@ -207,7 +207,7 @@ function createMotStatus(vehicle) {
 	if (!vehicle.motStatus) return { motStatus: 'Unknown', motDue: 'Unknown' };
 
 	const currentDate = new Date().setHours(24, 0, 0, 0);
-	let motStatus = vehicle.motStatus;
+	const motStatus = vehicle.motStatus;
 	let motDue = '';
 
 	if (vehicle.motExpiryDate) {

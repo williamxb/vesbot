@@ -47,7 +47,7 @@ module.exports = {
 
 		if (!validateRegistration(registration)) {
 			// Input failed validation
-			let embed = new EmbedBuilder()
+			const embed = new EmbedBuilder()
 				.setTitle(`Registration failed validation.`)
 				.addFields({ name: 'Registration', value: registration, inline: true })
 				.setColor(0xff0000);
@@ -66,9 +66,9 @@ module.exports = {
 			data = response.data;
 			status = response.status;
 		} catch (error) {
+			notify('critical', error);
 			const embed = new EmbedBuilder()
 				.setTitle(`An error occured.`)
-				// .addFields({ name: 'Error:', value: error, inline: true })
 				.setColor(0xffaa00);
 			return interaction.editReply({ embeds: [embed] });
 		}
@@ -86,7 +86,7 @@ module.exports = {
 			return interaction.editReply({ embeds: [embed] });
 		}
 
-		let embedData = {
+		const embedData = {
 			year:
 				`${data.mot?.manufactureDate.split('-')[0]} ` ||
 				`${data.ves?.yearOfManufacture} ` ||

@@ -117,7 +117,7 @@ async function fetchAT(registration) {
  * @returns {Promise<Object>} Vehicle data
  */
 async function fetchVIN(registration, vinUrl) {
-	let url = vinUrl + registration;
+	const url = vinUrl + registration;
 	const response = await fetch(url);
 
 	if (!response.ok) {
@@ -168,7 +168,7 @@ async function fetchVehicleData(registration, apiConfig) {
 	);
 
 	if (Object.keys(successful).length === 0) {
-		notify('critical', 'All APIs failed for vehicle ' + registration);
+		notify('critical', `All APIs failed for vehicle ${registration}`);
 		throw new Error('No data available');
 	}
 

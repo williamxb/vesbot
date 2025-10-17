@@ -76,7 +76,7 @@ function processMotDefects(motTests) {
 	let motDefectsSummary = '';
 
 	for (const test of motTests) {
-		const testYear = parseInt(test.completedDate.split('-')[0]);
+		const testYear = parseInt(test.completedDate.split('-')[0], 10);
 
 		if (currentYear - testYear > 5) {
 			break;
