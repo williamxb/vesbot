@@ -123,7 +123,7 @@ module.exports = {
 		Object.assign(embedData, createTaxStatus(data?.ves));
 		Object.assign(embedData, createTaxCost(data?.ves, data?.mot));
 		Object.assign(embedData, createMotStatus(data?.ves));
-		Object.assign(embedData, processMotDefects(data.mot.motTests));
+		Object.assign(embedData, processMotDefects(data?.mot.motTests));
 
 		const embedFields = [
 			{ name: 'Vehicle Status', value: embedData.vehicleStatus, inline: true },
