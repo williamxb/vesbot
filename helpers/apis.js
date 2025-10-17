@@ -56,8 +56,9 @@ async function fetchMOT(registration, apiKey) {
 async function fetchEuro(registration) {
   const url = 'https://hpicheck.com/api/euro-status';
   const headers = {
-    'accept': 'application/json',
-    'user-agent': 'Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)',
+    'accept': '*/*',
+    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
   };
   const body = `vrm=${registration}`;
 
@@ -131,13 +132,7 @@ async function fetchVIN(registration, vinUrl) {
 async function fetchVehicleData(registration, apiConfig) {
   const { vesApiKey, vinUrl, motApiKey } = apiConfig;
 
-  const results = await Promise.allSettled([
-    fetchVES  (registration, vesApiKey),
-    fetchMOT  (registration, motApiKey),
-    fetchEuro (registration),
-    fetchAT   (registration),
-    fetchVIN  (registration, vinUrl)
-  ]);
+  const results = await Promise.allSettled([fetchVES(registration, vesApiKey), fetchMOT(registration, motApiKey), fetchEuro(registration), fetchAT(registration), fetchVIN(registration, vinUrl)]);
 
   const successful = {};
   const failed = {};
