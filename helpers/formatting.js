@@ -1,4 +1,4 @@
-const { formatDistance, compareDesc, add } = require("date-fns");
+const { formatDistance, compareDesc, add } = require('date-fns');
 
 /**
  * Data format and display functions
@@ -11,16 +11,16 @@ const { formatDistance, compareDesc, add } = require("date-fns");
  */
 function calculateColour(colour) {
 	const colourMap = {
-		WHITE: "⚪️",
-		SILVER: "⚪️",
-		BLACK: "⚫️",
-		RED: "🔴",
-		BLUE: "🔵",
-		BROWN: "🟤",
-		ORANGE: "🟠",
-		GREEN: "🟢",
-		YELLOW: "🟡",
-		PURPLE: "🟣",
+		WHITE: '⚪️',
+		SILVER: '⚪️',
+		BLACK: '⚫️',
+		RED: '🔴',
+		BLUE: '🔵',
+		BROWN: '🟤',
+		ORANGE: '🟠',
+		GREEN: '🟢',
+		YELLOW: '🟡',
+		PURPLE: '🟣',
 	};
 
 	return colourMap[colour] || colour;
@@ -33,26 +33,26 @@ function calculateColour(colour) {
  */
 function createVehicleStatus(vehicle) {
 	if (!vehicle) {
-		return { vehicleStatus: "Unknown", embedColour: 0x0000ff };
+		return { vehicleStatus: 'Unknown', embedColour: 0x0000ff };
 	}
 
 	if (
 		vehicle.stolen === false &&
 		vehicle.scrapped === false &&
-		vehicle.writeOffCategory === "none"
+		vehicle.writeOffCategory === 'none'
 	) {
-		return { vehicleStatus: "Clean ✨", embedColour: 0x00b67a };
+		return { vehicleStatus: 'Clean ✨', embedColour: 0x00b67a };
 	}
 
 	const statusMap = [
-		vehicle.stolen ? "**Stolen**" : null,
-		vehicle.scrapped ? "**Scrapped**" : null,
-		vehicle.writeOffCategory !== "none"
+		vehicle.stolen ? '**Stolen**' : null,
+		vehicle.scrapped ? '**Scrapped**' : null,
+		vehicle.writeOffCategory !== 'none'
 			? `**Write-off - CAT ${vehicle.writeOffCategory}**`
 			: null,
 	].filter(Boolean);
 
-	const status = statusMap.join(", ");
+	const status = statusMap.join(', ');
 	return { vehicleStatus: status, embedColour: 0xb11212 };
 }
 
@@ -63,8 +63,8 @@ function createVehicleStatus(vehicle) {
  */
 function detectImportedVehicle(vehicle) {
 	if (vehicle.monthOfFirstDvlaRegistration)
-		return { isImported: "**Imported vehicle**\n" };
-	return { isImported: "" };
+		return { isImported: '**Imported vehicle**\n' };
+	return { isImported: '' };
 }
 
 /**
@@ -72,19 +72,19 @@ function detectImportedVehicle(vehicle) {
  * @TODO: add tax bands to response and testing
  */
 const vedRates = [
-	{ co2: 100, band: "A", rate: 20 },
-	{ co2: 110, band: "B", rate: 20 },
-	{ co2: 120, band: "C", rate: 35 },
-	{ co2: 130, band: "D", rate: 165 },
-	{ co2: 140, band: "E", rate: 195 },
-	{ co2: 150, band: "F", rate: 215 },
-	{ co2: 165, band: "G", rate: 265 },
-	{ co2: 175, band: "H", rate: 315 },
-	{ co2: 185, band: "I", rate: 345 },
-	{ co2: 200, band: "J", rate: 395 },
-	{ co2: 225, band: "K", rate: 430 },
-	{ co2: 255, band: "L", rate: 735 },
-	{ co2: 999, band: "M", rate: 760 },
+	{ co2: 100, band: 'A', rate: 20 },
+	{ co2: 110, band: 'B', rate: 20 },
+	{ co2: 120, band: 'C', rate: 35 },
+	{ co2: 130, band: 'D', rate: 165 },
+	{ co2: 140, band: 'E', rate: 195 },
+	{ co2: 150, band: 'F', rate: 215 },
+	{ co2: 165, band: 'G', rate: 265 },
+	{ co2: 175, band: 'H', rate: 315 },
+	{ co2: 185, band: 'I', rate: 345 },
+	{ co2: 200, band: 'J', rate: 395 },
+	{ co2: 225, band: 'K', rate: 430 },
+	{ co2: 255, band: 'L', rate: 735 },
+	{ co2: 999, band: 'M', rate: 760 },
 ];
 
 /**
@@ -95,23 +95,23 @@ const vedRates = [
  */
 function createTaxCost(ves, mot) {
 	if (!mot?.registrationDate && !ves?.monthOfFirstRegistration) {
-		return { taxCost: "Unknown" };
+		return { taxCost: 'Unknown' };
 	}
 
 	// imported vehicle = PLG Vehicle
-	if (ves.monthOfFirstDvlaRegistration) return { taxCost: "(TC39) £345" };
+	if (ves.monthOfFirstDvlaRegistration) return { taxCost: '(TC39) £345' };
 
-	let taxCost = "";
+	let taxCost = '';
 	const co2Emissions = ves?.co2Emissions;
 	const engineCapacity = ves?.engineCapacity || mot?.engineSize;
 
-	const regAfter2017 = new Date("2017-04-01");
+	const regAfter2017 = new Date('2017-04-01');
 	regAfter2017.setHours(0, 0, 0, 0);
 
-	const emissionsMarch2006Cutoff = new Date("2006-03-23");
+	const emissionsMarch2006Cutoff = new Date('2006-03-23');
 	emissionsMarch2006Cutoff.setHours(0, 0, 0, 0);
 
-	const regAfter2001 = new Date("2001-03-01");
+	const regAfter2001 = new Date('2001-03-01');
 	regAfter2001.setHours(0, 0, 0, 0);
 
 	const registrationDate = new Date(
@@ -128,12 +128,12 @@ function createTaxCost(ves, mot) {
 			compareDesc(currentDate, luxTaxDateThreshold) === 1 ||
 			compareDesc(currentDate, luxTaxDateThreshold) === 0
 		) {
-			taxCost = "£195 / £620";
+			taxCost = '£195 / £620';
 		} else {
-			taxCost = "£195";
+			taxCost = '£195';
 		}
 	} else if (compareDesc(regAfter2001, registrationDate) == 1) {
-		if (!ves.co2Emissions) return { taxCost: "Unknown" };
+		if (!ves.co2Emissions) return { taxCost: 'Unknown' };
 
 		for (const rate of vedRates) {
 			if (co2Emissions <= rate.co2) {
@@ -146,19 +146,19 @@ function createTaxCost(ves, mot) {
 			compareDesc(emissionsMarch2006Cutoff, registrationDate) == -1 &&
 			taxCost > 430
 		) {
-			taxCost = "(K) £430";
+			taxCost = '(K) £430';
 		} else {
 			taxCost = `£${taxCost}`;
 		}
 	} else {
-		if (!mot?.engineSize && !ves?.engineCapacity) return { taxCost: "Unknown" };
+		if (!mot?.engineSize && !ves?.engineCapacity) return { taxCost: 'Unknown' };
 
 		console.log(engineCapacity);
 
 		if (engineCapacity >= 1549) {
-			return { taxCost: "£360" };
+			return { taxCost: '£360' };
 		} else {
-			return { taxCost: "£220" };
+			return { taxCost: '£220' };
 		}
 	}
 
@@ -171,11 +171,11 @@ function createTaxCost(ves, mot) {
  * @returns {string} description of tax status
  */
 function createTaxStatus(vehicle) {
-	if (!vehicle.taxStatus) return { taxStatus: "Unknown", taxDue: "Unknown" };
+	if (!vehicle.taxStatus) return { taxStatus: 'Unknown', taxDue: 'Unknown' };
 
 	const currentDate = new Date().setHours(24, 0, 0, 0);
 	let taxStatus = vehicle.taxStatus;
-	let taxDue = "Unknown"; // set default
+	let taxDue = 'Unknown'; // set default
 
 	if (vehicle.taxDueDate) {
 		const taxDueDate = new Date(vehicle.taxDueDate).setHours(24, 0, 0, 0);
@@ -193,7 +193,7 @@ function createTaxStatus(vehicle) {
 		}
 	}
 
-	if (taxStatus === "SORN") taxDue = "N/A";
+	if (taxStatus === 'SORN') taxDue = 'N/A';
 
 	return { taxStatus: taxStatus, taxDue: taxDue };
 }
@@ -204,11 +204,11 @@ function createTaxStatus(vehicle) {
  * @returns {string} description of MOT status
  */
 function createMotStatus(vehicle) {
-	if (!vehicle.motStatus) return { motStatus: "Unknown", motDue: "Unknown" };
+	if (!vehicle.motStatus) return { motStatus: 'Unknown', motDue: 'Unknown' };
 
 	const currentDate = new Date().setHours(24, 0, 0, 0);
 	let motStatus = vehicle.motStatus;
-	let motDue = "";
+	let motDue = '';
 
 	if (vehicle.motExpiryDate) {
 		const motExpiryDate = new Date(vehicle.motExpiryDate).setHours(24, 0, 0, 0);

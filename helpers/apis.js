@@ -1,4 +1,4 @@
-const { getAccessToken } = require('./msal')
+const { getAccessToken } = require('./msal');
 const { notify } = require('./notify');
 
 /**
@@ -8,20 +8,24 @@ const { notify } = require('./notify');
  * @returns {Promise<Object>} Vehicle data
  */
 async function fetchVES(registration, apiKey) {
-  const url = `https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles`;
-  const headers = {
-    'accept': 'application/json',
-    'x-api-key': apiKey,
-  };
-  const body = { registrationNumber: registration };
+	const url = `https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles`;
+	const headers = {
+		accept: 'application/json',
+		'x-api-key': apiKey,
+	};
+	const body = { registrationNumber: registration };
 
-  const response = await fetch(url, { headers, method: 'POST', body: JSON.stringify(body) });
+	const response = await fetch(url, {
+		headers,
+		method: 'POST',
+		body: JSON.stringify(body),
+	});
 
-  if (!response.ok) {
-    throw new Error(response.status);
-  }
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
 
-  return await response.json();
+	return await response.json();
 }
 
 /**
@@ -31,21 +35,21 @@ async function fetchVES(registration, apiKey) {
  * @returns {Promise<Object>} Vehicle data
  */
 async function fetchMOT(registration, apiKey) {
-  const token = await getAccessToken();
-  const url = `https://history.mot.api.gov.uk/v1/trade/vehicles/registration/${registration}`;
-  const headers = {
-    'accept': 'application/json',
-    'Authorization': `Bearer ${token}`,
-    'X-API-KEY': apiKey,
-  };
+	const token = await getAccessToken();
+	const url = `https://history.mot.api.gov.uk/v1/trade/vehicles/registration/${registration}`;
+	const headers = {
+		accept: 'application/json',
+		Authorization: `Bearer ${token}`,
+		'X-API-KEY': apiKey,
+	};
 
-  const response = await fetch(url, { headers });
+	const response = await fetch(url, { headers });
 
-  if (!response.ok) {
-    throw new Error(response.status);
-  }
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
 
-  return await response.json();
+	return await response.json();
 }
 
 /**
@@ -54,28 +58,28 @@ async function fetchMOT(registration, apiKey) {
  * @returns {Promise<Object>} Euro status data
  */
 async function fetchEuro(registration) {
-  const url = 'https://hpicheck.com/api/euro-status';
-  const headers = {
-    'accept': '*/*',
-    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-  };
-  const body = `vrm=${registration}`;
+	const url = 'https://hpicheck.com/api/euro-status';
+	const headers = {
+		accept: '*/*',
+		'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+		'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+	};
+	const body = `vrm=${registration}`;
 
-  const response = await fetch(url, { headers, method: 'POST', body });
+	const response = await fetch(url, { headers, method: 'POST', body });
 
-  if (!response.ok) {
-    throw new Error(response.status);
-  }
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
 
-  const data = await response.json();
+	const data = await response.json();
 
-  // no data found. api returns 200 regardless of data
-  if (data.error) {
-    throw new Error('No data found');
-  }
+	// no data found. api returns 200 regardless of data
+	if (data.error) {
+		throw new Error('No data found');
+	}
 
-  return await data;
+	return await data;
 }
 
 /**
@@ -84,27 +88,27 @@ async function fetchEuro(registration) {
  * @returns {Promise<Object>} Vehicle data
  */
 async function fetchAT(registration) {
-  const url = 'https://www.autotrader.co.uk/at-gateway?opname=VrmLookupQuery';
-  const headers = {
-    'accept': '*/*',
-    'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-    'content-type': 'application/json',
-    'Referer': 'https://www.autotrader.co.uk/selling/find-car',
-    'Referrer-Policy': 'origin-when-cross-origin',
-  };
-  const body = `{"operationName":"VrmLookupQuery","variables":{"vrm":"${registration}"},"query":"query VrmLookupQuery($vrm: String!) {\\n  vehicle {\\n    vrmLookup(registration: $vrm) {\\n      make\\n      model\\n      derivativeShort\\n      derivativeId\\n      vehicleType\\n      scrapped\\n      stolen\\n      writeOffCategory\\n      }\\n  }\\n}\\n"}`;
-  const response = await fetch(url, { headers, method: 'POST', body });
+	const url = 'https://www.autotrader.co.uk/at-gateway?opname=VrmLookupQuery';
+	const headers = {
+		accept: '*/*',
+		'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+		'content-type': 'application/json',
+		Referer: 'https://www.autotrader.co.uk/selling/find-car',
+		'Referrer-Policy': 'origin-when-cross-origin',
+	};
+	const body = `{"operationName":"VrmLookupQuery","variables":{"vrm":"${registration}"},"query":"query VrmLookupQuery($vrm: String!) {\\n  vehicle {\\n    vrmLookup(registration: $vrm) {\\n      make\\n      model\\n      derivativeShort\\n      derivativeId\\n      vehicleType\\n      scrapped\\n      stolen\\n      writeOffCategory\\n      }\\n  }\\n}\\n"}`;
+	const response = await fetch(url, { headers, method: 'POST', body });
 
-  if (!response.ok) {
-    throw new Error(response.status);
-  }
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
 
-  const data = await response.json();
-  if (data.data.vehicle.vrmLookup === null) {
-    throw new Error('No data found');
-  }
+	const data = await response.json();
+	if (data.data.vehicle.vrmLookup === null) {
+		throw new Error('No data found');
+	}
 
-  return await data.data.vehicle.vrmLookup;
+	return await data.data.vehicle.vrmLookup;
 }
 
 /**
@@ -113,58 +117,69 @@ async function fetchAT(registration) {
  * @returns {Promise<Object>} Vehicle data
  */
 async function fetchVIN(registration, vinUrl) {
-  let url = vinUrl + registration;
-  const response = await fetch(url);
+	let url = vinUrl + registration;
+	const response = await fetch(url);
 
-  if (!response.ok) {
-    throw new Error(response.status);
-  }
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
 
-  return await response.json();
+	return await response.json();
 }
 
 /**
- * 
+ *
  * @param {string} registration Vehicle registration
  * @param {Object} apiConfig API keys
  * @returns {Promise<Object>} Successful API responses and statuses
  */
 async function fetchVehicleData(registration, apiConfig) {
-  const { vesApiKey, vinUrl, motApiKey } = apiConfig;
+	const { vesApiKey, vinUrl, motApiKey } = apiConfig;
 
-  const results = await Promise.allSettled([fetchVES(registration, vesApiKey), fetchMOT(registration, motApiKey), fetchEuro(registration), fetchAT(registration), fetchVIN(registration, vinUrl)]);
+	const results = await Promise.allSettled([
+		fetchVES(registration, vesApiKey),
+		fetchMOT(registration, motApiKey),
+		fetchEuro(registration),
+		fetchAT(registration),
+		fetchVIN(registration, vinUrl),
+	]);
 
-  const successful = {};
-  const failed = {};
-  let listApiStatus = "";
+	const successful = {};
+	const failed = {};
+	let listApiStatus = '';
 
-  results.forEach((result, i) => {
-    const apiName = ['ves', 'mot', 'euro', 'hpi', 'vin'];
+	results.forEach((result, i) => {
+		const apiName = ['ves', 'mot', 'euro', 'hpi', 'vin'];
 
-    if (result.status === 'fulfilled') {
-      successful[apiName[i]] = result.value;
-    } else {
-      failed[`api${i + 1}`] = result.reason.message;
-      listApiStatus += ` • ${apiName[i]} ${result.reason.message}`;
-      notify('warning', `${apiName[i]} failed for ${registration}: ${result.reason.message}`);
-    }
-  });
+		if (result.status === 'fulfilled') {
+			successful[apiName[i]] = result.value;
+		} else {
+			failed[`api${i + 1}`] = result.reason.message;
+			listApiStatus += ` • ${apiName[i]} ${result.reason.message}`;
+			notify(
+				'warning',
+				`${apiName[i]} failed for ${registration}: ${result.reason.message}`,
+			);
+		}
+	});
 
-  console.log(`${registration} ${Object.keys(successful).length}/${Object.keys(failed).length} ${listApiStatus}`);
+	console.log(
+		`${registration} ${Object.keys(successful).length}/${Object.keys(failed).length} ${listApiStatus}`,
+	);
 
-  if (Object.keys(successful).length === 0) {
-    notify('critical', 'All APIs failed for vehicle ' + registration);
-    throw new Error('No data available');
-  }
+	if (Object.keys(successful).length === 0) {
+		notify('critical', 'All APIs failed for vehicle ' + registration);
+		throw new Error('No data available');
+	}
 
-  return { data: successful, status: listApiStatus };
+	return { data: successful, status: listApiStatus };
 }
 
 module.exports = {
-  fetchVES,
-  fetchMOT,
-  fetchEuro,
-  fetchAT,
-  fetchVIN,
-  fetchVehicleData,
-}
+	fetchVES,
+	fetchMOT,
+	fetchEuro,
+	fetchAT,
+	fetchVIN,
+	fetchVehicleData,
+};
