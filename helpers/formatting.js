@@ -108,7 +108,7 @@ function createTaxCost(ves, mot) {
 
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
-  
+
   if (compareDesc(regAfter2017, registrationDate) === 1) {
     const luxTaxDateThreshold = add(registrationDate, { years: 5 });
     if (compareDesc(currentDate, luxTaxDateThreshold) === 1 || compareDesc(currentDate, luxTaxDateThreshold) === 0) {
@@ -118,7 +118,7 @@ function createTaxCost(ves, mot) {
     }
   } else if (compareDesc(regAfter2001, registrationDate) == 1) {
     if (!ves.co2Emissions) return { taxCost: 'Unknown' };
-    
+
     for (const rate of vedRates) {
       if (co2Emissions <= rate.co2) {
         taxCost = rate.rate;
@@ -133,7 +133,7 @@ function createTaxCost(ves, mot) {
     }
   } else {
     if (!mot?.engineSize && !ves?.engineCapacity) return { taxCost: 'Unknown' };
-    
+
     if (mot?.engineSize || ves?.engineCapacity >= 1549) {
       return { taxCost: '£360' };
     } else {
