@@ -581,5 +581,193 @@ describe('createTaxCost', () => {
 	});
 });
 
-// describe('createTaxStatus')
-// describe('createMotStatus')
+describe('createTaxStatus', () => {
+	test('should handle missing input', () => {
+		ves = {};
+		const result = createTaxStatus(ves);
+		expect(result).toStrictEqual({
+			taxDue: 'Unknown',
+			taxStatus: 'Unknown',
+		});
+	});
+	test('should handle missing taxStatus', () => {
+		ves = {
+			// taxStatus: 'Taxed', test missing taxStatus
+			taxDueDate: '2026-11-01',
+			motStatus: 'Valid',
+			make: 'BMW',
+			yearOfManufacture: 2013,
+			engineCapacity: 2993,
+			co2Emissions: 164,
+			fuelType: 'DIESEL',
+			markedForExport: false,
+			colour: 'WHITE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2024-11-01',
+			motExpiryDate: '2025-12-26',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2013-03',
+		};
+		const result = createTaxStatus(ves);
+		expect(result).toStrictEqual({
+			taxDue: 'Unknown',
+			taxStatus: 'Unknown',
+		});
+	});
+	test('should handle vehicles on SORN', () => {
+		ves = {
+			taxStatus: 'SORN',
+			taxDueDate: '2026-11-01',
+			motStatus: 'Valid',
+			make: 'BMW',
+			yearOfManufacture: 2013,
+			engineCapacity: 2993,
+			co2Emissions: 164,
+			fuelType: 'DIESEL',
+			markedForExport: false,
+			colour: 'WHITE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2024-11-01',
+			motExpiryDate: '2025-12-26',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2013-03',
+		};
+		const result = createTaxStatus(ves);
+		expect(result).toStrictEqual({
+			taxDue: 'N/A',
+			taxStatus: 'SORN',
+		});
+	});
+	test('should handle taxed vehicles', () => {
+		ves = {
+			taxStatus: 'Valid',
+			taxDueDate: '2026-11-01',
+			motStatus: 'Valid',
+			make: 'BMW',
+			yearOfManufacture: 2013,
+			engineCapacity: 2993,
+			co2Emissions: 164,
+			fuelType: 'DIESEL',
+			markedForExport: false,
+			colour: 'WHITE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2024-11-01',
+			motExpiryDate: '2025-12-26',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2013-03',
+		};
+		const result = createTaxStatus(ves);
+		expect(result).toStrictEqual({
+			taxDue: 'Expires in about 1 year',
+			taxStatus: 'Valid',
+		});
+	});
+	test('should handle untaxed vehicles', () => {
+		ves = {
+			taxStatus: 'Untaxed',
+			taxDueDate: '2025-10-13',
+			motStatus: 'Valid',
+			make: 'MINI',
+			yearOfManufacture: 2014,
+			engineCapacity: 1499,
+			co2Emissions: 105,
+			fuelType: 'PETROL',
+			markedForExport: false,
+			colour: 'ORANGE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2025-10-13',
+			motExpiryDate: '2025-11-23',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2014-09',
+		};
+		const result = createTaxStatus(ves);
+		expect(result).toStrictEqual({
+			taxDue: 'Expired 4 days ago',
+			taxStatus: 'Untaxed',
+		});
+	});
+});
+
+describe('createMotStatus', () => {
+	test('should handle missing input', () => {
+		ves = {};
+		const result = createMotStatus(ves);
+		expect(result).toStrictEqual({
+			motDue: 'Unknown',
+			motStatus: 'Unknown',
+		});
+	});
+	test('should handle missing motStatus', () => {
+		ves = {
+			taxStatus: 'Taxed',
+			taxDueDate: '2026-11-01',
+			// motStatus: 'Valid', test missing motStatus
+			make: 'BMW',
+			yearOfManufacture: 2013,
+			engineCapacity: 2993,
+			co2Emissions: 164,
+			fuelType: 'DIESEL',
+			markedForExport: false,
+			colour: 'WHITE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2024-11-01',
+			motExpiryDate: '2025-12-26',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2013-03',
+		};
+		const result = createMotStatus(ves);
+		expect(result).toStrictEqual({
+			motDue: 'Unknown',
+			motStatus: 'Unknown',
+		});
+	});
+
+	test('should handle vehicles with current MOT', () => {
+		ves = {
+			taxStatus: 'Valid',
+			taxDueDate: '2026-11-01',
+			motStatus: 'Valid',
+			make: 'BMW',
+			yearOfManufacture: 2013,
+			engineCapacity: 2993,
+			co2Emissions: 164,
+			fuelType: 'DIESEL',
+			markedForExport: false,
+			colour: 'WHITE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2024-11-01',
+			motExpiryDate: '2025-12-26',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2013-03',
+		};
+		const result = createMotStatus(ves);
+		expect(result).toStrictEqual({
+			motDue: 'Expires in 2 months',
+			motStatus: 'Valid',
+		});
+	});
+	test('should handle vehicles with expired MOT', () => {
+		ves = {
+			taxStatus: 'Untaxed',
+			taxDueDate: '2025-10-13',
+			motStatus: 'Valid',
+			make: 'MINI',
+			yearOfManufacture: 2014,
+			engineCapacity: 1499,
+			co2Emissions: 105,
+			fuelType: 'PETROL',
+			markedForExport: false,
+			colour: 'ORANGE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2025-10-13',
+			motExpiryDate: '2025-11-23',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2014-09',
+		};
+		const result = createMotStatus(ves);
+		expect(result).toStrictEqual({
+			motDue: 'Expires in about 1 month',
+			motStatus: 'Valid',
+		});
+	});
+});
