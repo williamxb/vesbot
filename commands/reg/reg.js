@@ -88,7 +88,7 @@ module.exports = {
       { name: 'Last 5 years:', value: embedData.motDefectsSummary, inline: false },
       { name: 'Tax Status', value: embedData.taxStatus, inline: true },
       { name: 'Tax Expiry', value: embedData.taxDue, inline: true },
-      { name: 'Tax Cost', value: '£xxx', inline: true },
+      { name: 'Tax Cost', value: embedData.taxCost, inline: true },
       { name: 'MOT Status', value: embedData.motStatus, inline: true },
       { name: 'MOT Expiry', value: embedData.motDue, inline: true },
     ];
