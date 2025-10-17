@@ -38,15 +38,12 @@ module.exports = {
       data = response.data;
       status = response.status;
     } catch (error) {
-      console.log(error);
       const embed = new EmbedBuilder()
         .setTitle(`An error occured.`)
         // .addFields({ name: 'Error:', value: error, inline: true })
         .setColor(0xffaa00);
       return interaction.editReply({ embeds: [embed] });
     }
-
-    console.log(data);
 
     if (data === null) {
       // Registration does not exist
@@ -79,17 +76,20 @@ module.exports = {
     // Create vehicleStatus and embedColour
     Object.assign(embedData, detectImportedVehicle(data?.ves));
     Object.assign(embedData, createVehicleStatus(data?.hpi));
-    Object.assign(embedData, { taxStatus: createTaxStatus(data?.ves) });
-    Object.assign(embedData, { motStatus: createMotStatus(data?.ves) });
-
-    const motDefectsSummary = data.mot?.motTests ? processMotDefects(data.mot.motTests) : null;
+    Object.assign(embedData, createTaxStatus(data?.ves));
+    Object.assign(embedData, createMotStatus(data?.ves));
+    Object.assign(embedData, processMotDefects(data.mot.motTests));
 
     const embedFields = [
       { name: 'Vehicle Status', value: embedData.vehicleStatus, inline: true },
       { name: 'VIN', value: embedData.vin, inline: true },
-      { name: 'MOT Status', value: embedData.motStatus, inline: true },
+      { name: 'Last V5C', value: embedData.lastV5, inline: true },
+      { name: 'Last 5 years:', value: embedData.motDefectsSummary, inline: false },
       { name: 'Tax Status', value: embedData.taxStatus, inline: true },
-      { name: 'Last 5 years:', value: motDefectsSummary, inline: false },
+      { name: 'Tax Expiry', value: embedData.taxDue, inline: true },
+      { name: 'Tax Cost', value: '£xxx', inline: true },
+      { name: 'MOT Status', value: embedData.motStatus, inline: true },
+      { name: 'MOT Expiry', value: embedData.motDue, inline: true },
     ];
 
     const embed = new EmbedBuilder()

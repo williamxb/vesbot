@@ -62,31 +62,31 @@ function detectImportedVehicle(vehicle) {
  * @returns {string} description of tax status
  */
 function createTaxStatus(vehicle) {
-  let taxStatus = '';
-  const currentDate = new Date();
-  currentDate.setHours(24, 0, 0, 0);
+  if (!vehicle.taxStatus) return { taxStatus: 'Unknown', taxDue: 'Unknown' };
 
-  if (!vehicle.taxStatus) return 'Tax status unknown';
-
-  taxStatus += vehicle.taxStatus;
+  const currentDate = new Date().setHours(24, 0, 0, 0);
+  let taxStatus = vehicle.taxStatus;
+  let taxDue = 'Unknown'; // set default
 
   if (vehicle.taxDueDate) {
-    const taxDueDate = new Date(vehicle.taxDueDate);
-    taxDueDate.setHours(24, 0, 0, 0);
+    const taxDueDate = new Date(vehicle.taxDueDate).setHours(24, 0, 0, 0);
 
     switch (compareDesc(taxDueDate, currentDate)) {
       case -1: // current
-        taxStatus += `, expires ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
+        taxDue = `Expires ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
         break;
       case 0:
-        taxStatus += `, expires today`;
+        taxDue = `Expires today`;
         break;
       case 1: // expired
-        taxStatus += `, expired ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
+        taxDue = `Expired ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
         break;
     }
   }
-  return taxStatus;
+
+  if (taxStatus === 'SORN') taxDue = 'N/A';
+
+  return { taxStatus: taxStatus, taxDue: taxDue };
 }
 
 /**
@@ -95,30 +95,29 @@ function createTaxStatus(vehicle) {
  * @returns {string} description of MOT status
  */
 function createMotStatus(vehicle) {
-  let motStatus = '';
-  const currentDate = new Date();
-  currentDate.setHours(24, 0, 0, 0);
+  if (!vehicle.motStatus) return { motStatus: 'Unknown', motDue: 'Unknown' };
 
-  if (!vehicle.motStatus) return 'Tax status unknown';
-
-  motStatus += vehicle.motStatus;
+  const currentDate = new Date().setHours(24, 0, 0, 0);
+  let motStatus = vehicle.motStatus;
+  let motDue = '';
 
   if (vehicle.motExpiryDate) {
-    const motExpiryDate = new Date(vehicle.motExpiryDate);
-    motExpiryDate.setHours(24, 0, 0, 0);
+    const motExpiryDate = new Date(vehicle.motExpiryDate).setHours(24, 0, 0, 0);
+
     switch (compareDesc(motExpiryDate, currentDate)) {
       case -1: // current
-        motStatus += `, expires ${formatDistance(motExpiryDate, currentDate, { addSuffix: true })}`;
+        motDue = `Expires ${formatDistance(motExpiryDate, currentDate, { addSuffix: true })}`;
         break;
       case 0:
-        motStatus += `, expires today.`;
+        motDue = `Expires today`;
         break;
       case 1: // expired
-        motStatus += `, expired ${formatDistance(motExpiryDate, currentDate, { addSuffix: true })}`;
+        motDue = `Expired ${formatDistance(motExpiryDate, currentDate, { addSuffix: true })}`;
         break;
     }
   }
-  return motStatus;
+
+  return { motStatus: motStatus, motDue: motDue };
 }
 
 module.exports = {

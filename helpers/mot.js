@@ -91,9 +91,9 @@ function processMotDefects(motTests) {
     }
   }
 
-  if (!motDefectsSummary) return "No MOT fails"
+  if (!motDefectsSummary) motDefectsSummary = 'No MOT fails';
   
-  return motDefectsSummary.trim();
+  return { motDefectsSummary: motDefectsSummary };
 }
 
 module.exports = { processMotDefects }
