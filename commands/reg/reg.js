@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { InteractionContextType, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { validateRegistration, sanitiseInput } = require('../../helpers/validation');
-const { calculateColour, createVehicleStatus, createTaxStatus, createMotStatus } = require('../../helpers/formatting');
+const { calculateColour, createVehicleStatus, createTaxStatus, createMotStatus, detectImportedVehicle } = require('../../helpers/formatting');
 const { fetchVehicleData } = require('../../helpers/apis');
 const { notify } = require('../../helpers/notify');
 const { processMotDefects } = require('../../helpers/mot');
@@ -63,16 +63,21 @@ module.exports = {
       fuelType: data.mot?.fuelType || data.ves?.fuelType || 'Unknown',
       recall: data.mot?.hasOutstandingRecall || 'Unknown',
       vin: `\`${data.vin?.VIN}\`` || null,
-      taxStatus: '', // calculated
-      motStatus: '',
       lastV5: data.ves?.dateOfLastV5CIssued || null,
+      isImported: '', // calculated
+      taxStatus: '', // calculated
+      taxDue: '', // calculated
+      motStatus: '', // calculated
+      motDue: '', // calculated
+      motDefectsSummary: '', //calculated
       vehicleStatus: '', // calculated
-      embedColour: '', // calculated
       taxCost: '', // @TODO: calculate tax based on year, engine size, co2
       lez: '', // @TODO: calculate LEZ compliance with euro status
+      embedColour: '', // calculated
     };
 
     // Create vehicleStatus and embedColour
+    Object.assign(embedData, detectImportedVehicle(data?.ves));
     Object.assign(embedData, createVehicleStatus(data?.hpi));
     Object.assign(embedData, { taxStatus: createTaxStatus(data?.ves) });
     Object.assign(embedData, { motStatus: createMotStatus(data?.ves) });

@@ -47,6 +47,16 @@ function createVehicleStatus(vehicle) {
 }
 
 /**
+ * Detect if a vehicle has been imported
+ * @param {Object} vehicle data from VES API
+ * @returns {string} null, or message if vehicle has been imported
+ */
+function detectImportedVehicle(vehicle) {
+  if (vehicle.monthOfFirstDvlaRegistration) return { isImported: '**Imported vehicle**\n' };
+  return { isImported: '' };
+}
+
+/**
  * Create VED status
  * @param {Object} vehicle data from VES API
  * @returns {string} description of tax status
@@ -114,6 +124,7 @@ function createMotStatus(vehicle) {
 module.exports = {
   calculateColour,
   createVehicleStatus,
+  detectImportedVehicle,
   createTaxStatus,
   createMotStatus,
 };
