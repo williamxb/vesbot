@@ -48,7 +48,7 @@ function createVehicleStatus(vehicle) {
 
 /**
  * Detect if a vehicle has been imported
- * @param {Object} vehicle data from VES API
+ * @param {Object} vehicle data from DVLA VES API
  * @returns {string} null, or message if vehicle has been imported
  */
 function detectImportedVehicle(vehicle) {
@@ -56,9 +56,97 @@ function detectImportedVehicle(vehicle) {
   return { isImported: '' };
 }
 
+
 /**
- * Create VED status
- * @param {Object} vehicle data from VES API
+ * VED rates for calculating vehicle tax cost
+ */
+const vedRates = [
+  { co2: 100, rate: 20 },
+  { co2: 110, rate: 20 },
+  { co2: 120, rate: 35 },
+  { co2: 130, rate: 165 },
+  { co2: 140, rate: 195 },
+  { co2: 150, rate: 215 },
+  { co2: 165, rate: 265 },
+  { co2: 175, rate: 315 },
+  { co2: 185, rate: 345 },
+  { co2: 200, rate: 395 },
+  { co2: 225, rate: 430 },
+  { co2: 255, rate: 735 },
+  { co2: 999, rate: 760 },
+]
+
+/**
+ * Create vehicle tax cost and import likeliness
+ * @param {Object} ves data from DVSA MOT API
+ * @param {Object} mot data from DVLA VES API
+ * @returns {string} calculated tax cost
+ */
+function createTaxCost(ves, mot) {
+  if (!mot.registrationDate && !ves.monthOfFirstRegistration) { return { taxCost: 'Unknown' } }
+
+  // imported vehicle = PLG Vehicle
+  if(ves.monthOfFirstDvlaRegistration) return { taxCost: '(TC39) £345'}
+
+  let taxCost = '';
+  const co2Emissions = ves.co2Emissions;
+  const engineCapacity = ves.engineCapacity || mot.engineSize;
+
+  const regAfter2017 = new Date('2017-05-01');
+  regAfter2017.setHours(0, 0, 0, 0);
+
+  const emissionsMarch2006Cutoff = new Date('2006-03-23');
+  emissionsMarch2006Cutoff.setHours(0, 0, 0, 0);
+
+  const regAfter2001 = new Date('2001-03-01');
+  regAfter2001.setHours(0, 0, 0, 0);
+
+  const registrationDate = new Date(mot.registrationDate || `${ves.monthOfFirstRegistration}-01`);
+  registrationDate.setHours(0, 0, 0, 0);
+
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+  
+  if (compareDesc(regAfter2017, registrationDate) === 1) {
+    const luxTaxDateThreshold = add(registrationDate, { years: 5 });
+    if (compareDesc(currentDate, luxTaxDateThreshold) === 1 || compareDesc(currentDate, luxTaxDateThreshold) === 0) {
+      taxCost = '£195 / £620'
+    } else {
+      taxCost = '£195';
+    }
+  } else if (compareDesc(regAfter2001, registrationDate) == 1) {
+    console.log('Registration is 2001 - 2017: co2 based')
+    if (!ves.co2Emissions) return { taxCost: 'Unknown' }
+    
+    for (const rate of vedRates) {
+      if (co2Emissions <= rate.co2) {
+        taxCost = rate.rate;
+        break;
+      }
+    }
+
+    if (compareDesc(emissionsMarch2006Cutoff, registrationDate) == -1 && taxCost > 430) {
+      taxCost = '£430 (K)'
+    } else {
+      taxCost = `£${taxCost}`
+    }
+
+  } else {
+    if (!mot.engineSize && !ves.engineCapacity) return { taxCost: 'Unknown' }
+    
+    if (mot.engineSize || ves.engineCapacity >= 1549) {
+      return { taxCost: '£360' }
+    } else {
+      return { taxCost: '£220' }
+    }
+  }
+
+  return {taxCost: taxCost}
+}
+
+/**
+ * Create vehicle tax status
+ * @param {Object} vehicle data from DVLA VES API
  * @returns {string} description of tax status
  */
 function createTaxStatus(vehicle) {
@@ -91,7 +179,7 @@ function createTaxStatus(vehicle) {
 
 /**
  * Create MOT status
- * @param {Object} vehicle data from VES API
+ * @param {Object} vehicle data from DVLA VES API
  * @returns {string} description of MOT status
  */
 function createMotStatus(vehicle) {
@@ -125,5 +213,6 @@ module.exports = {
   createVehicleStatus,
   detectImportedVehicle,
   createTaxStatus,
+  createTaxCost,
   createMotStatus,
 };

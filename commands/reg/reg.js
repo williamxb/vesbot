@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { InteractionContextType, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { validateRegistration, sanitiseInput } = require('../../helpers/validation');
-const { calculateColour, createVehicleStatus, createTaxStatus, createMotStatus, detectImportedVehicle } = require('../../helpers/formatting');
+const { calculateColour, createVehicleStatus, detectImportedVehicle, createTaxStatus, createTaxCost, createMotStatus } = require('../../helpers/formatting');
 const { fetchVehicleData } = require('../../helpers/apis');
 const { notify } = require('../../helpers/notify');
 const { processMotDefects } = require('../../helpers/mot');
@@ -74,9 +74,10 @@ module.exports = {
     };
 
     // Create vehicleStatus and embedColour
-    Object.assign(embedData, detectImportedVehicle(data?.ves));
     Object.assign(embedData, createVehicleStatus(data?.hpi));
+    Object.assign(embedData, detectImportedVehicle(data?.ves));
     Object.assign(embedData, createTaxStatus(data?.ves));
+    Object.assign(embedData, createTaxCost(data?.ves, data?.mot));
     Object.assign(embedData, createMotStatus(data?.ves));
     Object.assign(embedData, processMotDefects(data.mot.motTests));
 
