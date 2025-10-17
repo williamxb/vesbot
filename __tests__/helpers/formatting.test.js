@@ -429,22 +429,148 @@ describe('createTaxCost', () => {
       });
     });
   });
+
+  describe('vehicle is <2001', () => {
+    test('should handle MOT missing engine capacity', () => {
+      const ves = {
+        engineCapacity: 2143,
+        monthOfFirstRegistration: '1999-09',
+      };
+      const mot = {
+        registrationDate: '1999-09-26',
+        // engineSize: '2143', test missing engineSize
+      };
+      const result = createTaxCost(ves, mot);
+      expect(result).toStrictEqual({ taxCost: '£360' });
+    });
+
+    test('should handle VES missing engine capacity', () => {
+      const ves = {
+        // engineCapacity: 2143, test missing engineCapacity
+        monthOfFirstRegistration: '1999-09',
+      };
+      const mot = {
+        registrationDate: '1999-09-26',
+        engineSize: '2143',
+      };
+      const result = createTaxCost(ves, mot);
+      expect(result).toStrictEqual({ taxCost: '£360' });
+    });
+
+    test('should return unknown if engine capacity is missing(ALL)', () => {
+      const ves = {
+        // engineCapacity: 2143, test missing engineCapacity
+        monthOfFirstRegistration: '1999-09',
+      };
+      const mot = {
+        registrationDate: '1999-09-26',
+        // engineSize: '2143', test missing engineSize
+      };
+      const result = createTaxCost(ves, mot);
+      expect(result).toStrictEqual({ taxCost: 'Unknown' });
+    });
+
+    test('should return correct cost for >= 1549cc ', () => {
+      const ves = {
+        engineCapacity: 2999,
+        monthOfFirstRegistration: '1999-09',
+      };
+      const mot = {
+        registrationDate: '1999-09-26',
+        engineSize: '2999',
+      };
+      const result = createTaxCost(ves, mot);
+      expect(result).toStrictEqual({ taxCost: '£360' });
+    });
+
+    test('should return correct cost for < 1548cc ', () => {
+      const ves = {
+        engineCapacity: 999,
+        monthOfFirstRegistration: '1999-09',
+      };
+      const mot = {
+        registrationDate: '1999-09-26',
+        engineSize: '999',
+      };
+      const result = createTaxCost(ves, mot);
+      expect(result).toStrictEqual({ taxCost: '£220' });
+    });
+  });
+
+  describe('should handle cutoff dates correctly', () => {
+    describe('1 April 2017', () => {
+      test('should handle 2017-01-04 correctly', () => {
+        const ves = {
+          engineCapacity: 2143,
+          co2Emissions: 999,
+          monthOfFirstRegistration: '2017-04',
+        };
+        const mot = {
+          registrationDate: '2017-04-01',
+          engineSize: '2143',
+        };
+        const result = createTaxCost(ves, mot);
+        expect(result).toStrictEqual({ taxCost: '£195' });
+      });
+
+      test('should handle 2017-03-30 correctly', () => {
+        const ves = {
+          engineCapacity: 2143,
+          co2Emissions: 999,
+          monthOfFirstRegistration: '2017-04',
+        };
+        const mot = {
+          registrationDate: '2017-03-31',
+          engineSize: '2143',
+        };
+        const result = createTaxCost(ves, mot);
+        expect(result).toStrictEqual({ taxCost: '£760' });
+      });
+    });
+    describe('1 March 2001', () => {
+      test('should handle 2017-01-04 correctly', () => {
+        const ves = {
+          engineCapacity: 2143,
+          co2Emissions: 999,
+          monthOfFirstRegistration: '2001-03',
+        };
+        const mot = {
+          registrationDate: '2001-03-01',
+          engineSize: '2143',
+        };
+        const result = createTaxCost(ves, mot);
+        expect(result).toStrictEqual({ taxCost: '(K) £430' });
+      });
+
+      test('should handle 2001-02-28 correctly (large engine)', () => {
+        const ves = {
+          engineCapacity: 2143,
+          co2Emissions: 999,
+          monthOfFirstRegistration: '2001-02',
+        };
+        const mot = {
+          registrationDate: '2001-02-28',
+          engineSize: '2143',
+        };
+        const result = createTaxCost(ves, mot);
+        expect(result).toStrictEqual({ taxCost: '£360' });
+      });
+      test('should handle 2001-02-28 correctly (small engine)', () => {
+        const ves = {
+          engineCapacity: 999,
+          co2Emissions: 999,
+          monthOfFirstRegistration: '2001-02',
+        };
+        const mot = {
+          registrationDate: '2001-02-28',
+          engineSize: '2143',
+        };
+        const result = createTaxCost(ves, mot);
+        expect(result).toStrictEqual({ taxCost: '£220' });
+      });
+    });
+  });
 });
 
-// handle cutoff dates correctly:
-// post 2017
-// 2017-04-30 / 2017-05-01 // post 2017 cutoff
-// 2006-02-28 / 2006-03-01 // band K max cutoff
-// 2001-02-28 / 2001-03-01 // post 2001 cutoff
-// pre 2001
-
-// handle post 2017 flat rate
-// handle post 2017 potential luxury car tax
-
-// handle post 2001 pre 2017 co2 based
-// handle pre 2006 band K max
-
-// handle pre 2001 cc based
-// });
 // describe('createTaxStatus')
 // describe('createMotStatus')
