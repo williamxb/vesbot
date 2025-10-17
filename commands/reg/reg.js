@@ -94,7 +94,6 @@ module.exports = {
     ];
 
     const embed = new EmbedBuilder()
-      .setTimestamp()
       .setTitle(`${embedData.colour} ${embedData.year}${embedData.make} ${embedData.model}`)
       .setDescription(`${embedData.isImported}${embedData.trim}`)
       .addFields(embedFields)
