@@ -69,7 +69,7 @@ function formatDefectCounts(defectCounts) {
  */
 function processMotDefects(motTests) {
 	if (!motTests || motTests.length === 0) {
-		return null;
+		return { motDefectsSummary: 'No MOT history' };
 	}
 
 	const currentYear = new Date().getFullYear();
