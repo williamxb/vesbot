@@ -95,7 +95,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTimestamp()
       .setTitle(`${embedData.colour} ${embedData.year}${embedData.make} ${embedData.model}`)
-      .setDescription(`${embedData.trim}`)
+      .setDescription(`${embedData.isImported}${embedData.trim}`)
       .addFields(embedFields)
       .setFooter({ text: `${registration}${status}` })
       .setColor(embedData.embedColour);
