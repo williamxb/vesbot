@@ -6,7 +6,12 @@
 		"useIgnoreFile": false
 	},
 	"files": {
-		"ignoreUnknown": false
+		"includes": [
+			"*.js",
+			"commands/**/*.js",
+			"helpers/*.js",
+			"/__tests__/**/*.test.js"
+		]
 	},
 	"formatter": {
 		"enabled": true,
