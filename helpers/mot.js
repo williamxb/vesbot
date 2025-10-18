@@ -30,7 +30,7 @@ function isFailureDefect(type) {
 function extractDefectCategory(text) {
 	const categoryMatch = text.match(/\(0|\(1|\(2|\(3|\(4|\(5|\(6|\(7|\(8|\(9/i);
 	if (!categoryMatch) return 'Other';
-	return defectDescriptions[categoryMatch[0]] || 'Other';
+	return defectDescriptions[categoryMatch[0]];
 }
 
 /**
@@ -82,7 +82,7 @@ function processMotDefects(motTests) {
 			break;
 		}
 
-		const defects = test.defects || [];
+		const defects = test.defects;
 		const defectCount = countDefectsByCategory(defects);
 		const defectSummary = formatDefectCounts(defectCount);
 

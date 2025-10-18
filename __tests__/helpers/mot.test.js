@@ -49,6 +49,24 @@ describe('processMotDefects', () => {
 		const result = processMotDefects(motTests);
 		expect(result).toStrictEqual({ motDefectsSummary: 'No MOT fails' });
 	});
+
+	test('should return other for unmatched categories', () => {
+		const motTests = [
+			{
+				completedDate: '2025-11-21T15:26:08.000Z',
+				defects: [
+					{
+						dangerous: false,
+						text: 'Manually typed uncategorised advisory',
+						type: 'MAJOR',
+					},
+				],
+			},
+		];
+		const result = processMotDefects(motTests);
+		expect(result.motDefectsSummary).toStrictEqual(`2025 - 1x Other\n`);
+	});
+
 	test('should ignore minor and advisory defects', () => {
 		const motTests = [
 			{
@@ -228,6 +246,8 @@ describe('processMotDefects', () => {
 			},
 		];
 		const result = processMotDefects(motTests);
-		expect(result.motDefectsSummary).toBe(`2025 - 1x Identification of the vehicle, 1x Brakes\n2024 - 1x Steering, 1x Visibility\n2023 - 1x Axles, wheels, tyres and suspension, 1x Body, structure and attachments\n`)
+		expect(result.motDefectsSummary).toBe(
+			`2025 - 1x Identification of the vehicle, 1x Brakes\n2024 - 1x Steering, 1x Visibility\n2023 - 1x Axles, wheels, tyres and suspension, 1x Body, structure and attachments\n`,
+		);
 	});
 });
