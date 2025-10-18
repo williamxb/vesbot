@@ -33,6 +33,22 @@ describe('calculateColour', () => {
 });
 
 describe('createVehicleStatus', () => {
+	describe('should handle empty input', () => {
+		test('input = null', () => {
+			const vehicle = null;
+			const result = createVehicleStatus(vehicle);
+			expect(result.vehicleStatus).toBe('Unknown');
+			expect(result.embedColour).toBe(0x0000ff);
+		});
+
+		test('input = undefined', () => {
+			const vehicle = undefined;
+			const result = createVehicleStatus(vehicle);
+			expect(result.vehicleStatus).toBe('Unknown');
+			expect(result.embedColour).toBe(0x0000ff);
+		});
+	});
+
 	test('should return clean status', () => {
 		const vehicle = {
 			scrapped: false,
@@ -536,6 +552,7 @@ describe('createTaxCost', () => {
 				expect(result).toStrictEqual({ taxCost: '£760' });
 			});
 		});
+
 		describe('1 March 2001', () => {
 			test('should handle 2017-01-04 correctly', () => {
 				const ves = {
@@ -564,6 +581,7 @@ describe('createTaxCost', () => {
 				const result = createTaxCost(ves, mot);
 				expect(result).toStrictEqual({ taxCost: '£360' });
 			});
+
 			test('should handle 2001-02-28 correctly (small engine)', () => {
 				const ves = {
 					engineCapacity: 999,
@@ -582,38 +600,73 @@ describe('createTaxCost', () => {
 });
 
 describe('createTaxStatus', () => {
-	test('should handle missing input', () => {
-		ves = {};
-		const result = createTaxStatus(ves);
-		expect(result).toStrictEqual({
-			taxDue: 'Unknown',
-			taxStatus: 'Unknown',
+	beforeEach(() => {
+		// Mock system time
+		jest.useFakeTimers();
+		jest.setSystemTime(new Date('2025-10-17T12:00:00.000Z'));
+	});
+
+	describe('should handle missing inputs', () => {
+		test('should handle missing input', () => {
+			ves = {};
+			const result = createTaxStatus(ves);
+			expect(result).toStrictEqual({
+				taxDue: 'Unknown',
+				taxStatus: 'Unknown',
+			});
+		});
+
+		test('should handle missing taxStatus', () => {
+			ves = {
+				// taxStatus: 'Taxed', test missing taxStatus
+				taxDueDate: '2026-11-01',
+				motStatus: 'Valid',
+				make: 'BMW',
+				yearOfManufacture: 2013,
+				engineCapacity: 2993,
+				co2Emissions: 164,
+				fuelType: 'DIESEL',
+				markedForExport: false,
+				colour: 'WHITE',
+				typeApproval: 'M1',
+				dateOfLastV5CIssued: '2024-11-01',
+				motExpiryDate: '2025-12-26',
+				wheelplan: '2 AXLE RIGID BODY',
+				monthOfFirstRegistration: '2013-03',
+			};
+			const result = createTaxStatus(ves);
+			expect(result).toStrictEqual({
+				taxDue: 'Unknown',
+				taxStatus: 'Unknown',
+			});
+		});
+
+		test('should handle missing taxDueDate', () => {
+			ves = {
+				taxStatus: 'Taxed',
+				// taxDueDate: '2026-11-01', test missing taxDueDate
+				motStatus: 'Valid',
+				make: 'BMW',
+				yearOfManufacture: 2013,
+				engineCapacity: 2993,
+				co2Emissions: 164,
+				fuelType: 'DIESEL',
+				markedForExport: false,
+				colour: 'WHITE',
+				typeApproval: 'M1',
+				dateOfLastV5CIssued: '2024-11-01',
+				motExpiryDate: '2025-12-26',
+				wheelplan: '2 AXLE RIGID BODY',
+				monthOfFirstRegistration: '2013-03',
+			};
+			const result = createTaxStatus(ves);
+			expect(result).toStrictEqual({
+				taxDue: 'Unknown',
+				taxStatus: 'Taxed',
+			});
 		});
 	});
-	test('should handle missing taxStatus', () => {
-		ves = {
-			// taxStatus: 'Taxed', test missing taxStatus
-			taxDueDate: '2026-11-01',
-			motStatus: 'Valid',
-			make: 'BMW',
-			yearOfManufacture: 2013,
-			engineCapacity: 2993,
-			co2Emissions: 164,
-			fuelType: 'DIESEL',
-			markedForExport: false,
-			colour: 'WHITE',
-			typeApproval: 'M1',
-			dateOfLastV5CIssued: '2024-11-01',
-			motExpiryDate: '2025-12-26',
-			wheelplan: '2 AXLE RIGID BODY',
-			monthOfFirstRegistration: '2013-03',
-		};
-		const result = createTaxStatus(ves);
-		expect(result).toStrictEqual({
-			taxDue: 'Unknown',
-			taxStatus: 'Unknown',
-		});
-	});
+
 	test('should handle vehicles on SORN', () => {
 		ves = {
 			taxStatus: 'SORN',
@@ -638,6 +691,7 @@ describe('createTaxStatus', () => {
 			taxStatus: 'SORN',
 		});
 	});
+
 	test('should handle taxed vehicles', () => {
 		ves = {
 			taxStatus: 'Valid',
@@ -662,6 +716,7 @@ describe('createTaxStatus', () => {
 			taxStatus: 'Valid',
 		});
 	});
+
 	test('should handle untaxed vehicles', () => {
 		ves = {
 			taxStatus: 'Untaxed',
@@ -686,39 +741,102 @@ describe('createTaxStatus', () => {
 			taxStatus: 'Untaxed',
 		});
 	});
+
+	test('should handle vehicle with tax expiring today', () => {
+		ves = {
+			taxStatus: 'Taxed',
+			taxDueDate: '2025-10-17',
+			motStatus: 'Valid',
+			make: 'MINI',
+			yearOfManufacture: 2014,
+			engineCapacity: 1499,
+			co2Emissions: 105,
+			fuelType: 'PETROL',
+			markedForExport: false,
+			colour: 'ORANGE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2025-10-13',
+			motExpiryDate: '2025-11-23',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2014-09',
+		};
+		const result = createTaxStatus(ves);
+		expect(result).toStrictEqual({
+			taxDue: 'Expires today',
+			taxStatus: 'Taxed',
+		});
+	});
+
+	afterEach(() => {
+		jest.useRealTimers();
+	});
 });
 
 describe('createMotStatus', () => {
-	test('should handle missing input', () => {
-		ves = {};
-		const result = createMotStatus(ves);
-		expect(result).toStrictEqual({
-			motDue: 'Unknown',
-			motStatus: 'Unknown',
-		});
+	beforeEach(() => {
+		// Mock system time
+		jest.useFakeTimers();
+		jest.setSystemTime(new Date('2025-10-17T12:00:00.000Z'));
 	});
-	test('should handle missing motStatus', () => {
-		ves = {
-			taxStatus: 'Taxed',
-			taxDueDate: '2026-11-01',
-			// motStatus: 'Valid', test missing motStatus
-			make: 'BMW',
-			yearOfManufacture: 2013,
-			engineCapacity: 2993,
-			co2Emissions: 164,
-			fuelType: 'DIESEL',
-			markedForExport: false,
-			colour: 'WHITE',
-			typeApproval: 'M1',
-			dateOfLastV5CIssued: '2024-11-01',
-			motExpiryDate: '2025-12-26',
-			wheelplan: '2 AXLE RIGID BODY',
-			monthOfFirstRegistration: '2013-03',
-		};
-		const result = createMotStatus(ves);
-		expect(result).toStrictEqual({
-			motDue: 'Unknown',
-			motStatus: 'Unknown',
+
+	describe('should handle missing inputs', () => {
+		test('should handle missing input', () => {
+			ves = {};
+			const result = createMotStatus(ves);
+			expect(result).toStrictEqual({
+				motDue: 'Unknown',
+				motStatus: 'Unknown',
+			});
+		});
+
+		test('should handle missing motStatus', () => {
+			ves = {
+				taxStatus: 'Taxed',
+				taxDueDate: '2026-11-01',
+				// motStatus: 'Valid', test missing motStatus
+				make: 'BMW',
+				yearOfManufacture: 2013,
+				engineCapacity: 2993,
+				co2Emissions: 164,
+				fuelType: 'DIESEL',
+				markedForExport: false,
+				colour: 'WHITE',
+				typeApproval: 'M1',
+				dateOfLastV5CIssued: '2024-11-01',
+				motExpiryDate: '2025-12-26',
+				wheelplan: '2 AXLE RIGID BODY',
+				monthOfFirstRegistration: '2013-03',
+			};
+			const result = createMotStatus(ves);
+			expect(result).toStrictEqual({
+				motDue: 'Unknown',
+				motStatus: 'Unknown',
+			});
+		});
+
+		test('should handle missing motExpiryDate', () => {
+			ves = {
+				taxStatus: 'Taxed',
+				taxDueDate: '2026-11-01',
+				motStatus: 'Valid',
+				make: 'BMW',
+				yearOfManufacture: 2013,
+				engineCapacity: 2993,
+				co2Emissions: 164,
+				fuelType: 'DIESEL',
+				markedForExport: false,
+				colour: 'WHITE',
+				typeApproval: 'M1',
+				dateOfLastV5CIssued: '2024-11-01',
+				// motExpiryDate: '2025-12-26', test missing motExpiryDate
+				wheelplan: '2 AXLE RIGID BODY',
+				monthOfFirstRegistration: '2013-03',
+			};
+			const result = createMotStatus(ves);
+			expect(result).toStrictEqual({
+				motDue: 'Unknown',
+				motStatus: 'Valid',
+			});
 		});
 	});
 
@@ -746,11 +864,37 @@ describe('createMotStatus', () => {
 			motStatus: 'Valid',
 		});
 	});
+
+	test('should handle vehicles MOT expiring today', () => {
+		ves = {
+			taxStatus: 'Valid',
+			taxDueDate: '2026-11-01',
+			motStatus: 'Valid',
+			make: 'BMW',
+			yearOfManufacture: 2013,
+			engineCapacity: 2993,
+			co2Emissions: 164,
+			fuelType: 'DIESEL',
+			markedForExport: false,
+			colour: 'WHITE',
+			typeApproval: 'M1',
+			dateOfLastV5CIssued: '2024-11-01',
+			motExpiryDate: '2025-10-17',
+			wheelplan: '2 AXLE RIGID BODY',
+			monthOfFirstRegistration: '2013-03',
+		};
+		const result = createMotStatus(ves);
+		expect(result).toStrictEqual({
+			motDue: 'Expires today',
+			motStatus: 'Valid',
+		});
+	});
+
 	test('should handle vehicles with expired MOT', () => {
 		ves = {
 			taxStatus: 'Untaxed',
 			taxDueDate: '2025-10-13',
-			motStatus: 'Valid',
+			motStatus: 'Not valid',
 			make: 'MINI',
 			yearOfManufacture: 2014,
 			engineCapacity: 1499,
@@ -760,14 +904,18 @@ describe('createMotStatus', () => {
 			colour: 'ORANGE',
 			typeApproval: 'M1',
 			dateOfLastV5CIssued: '2025-10-13',
-			motExpiryDate: '2025-11-23',
+			motExpiryDate: '2024-11-23',
 			wheelplan: '2 AXLE RIGID BODY',
 			monthOfFirstRegistration: '2014-09',
 		};
 		const result = createMotStatus(ves);
 		expect(result).toStrictEqual({
-			motDue: 'Expires in about 1 month',
-			motStatus: 'Valid',
+			motDue: 'Expired 11 months ago',
+			motStatus: 'Not valid',
 		});
+	});
+
+	afterEach(() => {
+		jest.useRealTimers();
 	});
 });

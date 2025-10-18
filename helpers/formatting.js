@@ -153,8 +153,6 @@ function createTaxCost(ves, mot) {
 	} else {
 		if (!mot?.engineSize && !ves?.engineCapacity) return { taxCost: 'Unknown' };
 
-		console.log(engineCapacity);
-
 		if (engineCapacity >= 1549) {
 			return { taxCost: '£360' };
 		} else {
@@ -191,6 +189,8 @@ function createTaxStatus(vehicle) {
 				taxDue = `Expired ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
 				break;
 		}
+	} else {
+		taxDue = 'Unknown';
 	}
 
 	if (taxStatus === 'SORN') taxDue = 'N/A';
@@ -224,6 +224,8 @@ function createMotStatus(vehicle) {
 				motDue = `Expired ${formatDistance(motExpiryDate, currentDate, { addSuffix: true })}`;
 				break;
 		}
+	} else {
+		motDue = 'Unknown';
 	}
 
 	return { motStatus: motStatus, motDue: motDue };
