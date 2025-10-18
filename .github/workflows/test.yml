@@ -1,4 +1,6 @@
 name: Run tests
+permissions:
+  contents: read
 
 on: push
 
@@ -6,9 +8,6 @@ jobs:
   test:
     name: Run tests and collect coverage
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
 
     steps:
       - name: Checkout
