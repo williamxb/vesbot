@@ -47,26 +47,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: |
-            coverage/
-            junit.xml
+          path: coverage/junit.xml
           retention-days: 30
 
   test-summary:
     name: Test summary
-    runs-on: ubuntu-latest
+    uses: test-summary@action@v2
+    with:
+      path: |
+        coverage/
+        junit.xml
     needs: test
     if: always()
-
-    steps:
-      - name: Check test results
-        run: |
-          if [ "${{ needs.test.result }}" == "failure" ]; then
-            echo "❌ Tests failed"
-            exit 1
-          elif [ "${{ needs.test.result }}" == "cancelled" ]; then
-            echo "⚠️ Tests were cancelled"
-            exit 1
-          else
-            echo "✅ All tests passed"
-          fi
