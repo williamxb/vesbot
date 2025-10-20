@@ -72,4 +72,4 @@ jobs:
       - name: Test Summary
         uses: test-summary/action@v2
         with:
-          path: ./junit.xml
+          paths: ./junit.xml
