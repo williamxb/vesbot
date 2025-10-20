@@ -37,7 +37,6 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage/lcov.info
-          flag: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -60,6 +59,7 @@ jobs:
     steps:
       - name: Check test results
         run: |
+          ls
           if [ "${{ needs.test.result }}" == "failure" ]; then
             echo "❌ Tests failed"
             exit 1
