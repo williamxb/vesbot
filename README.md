@@ -1,4 +1,6 @@
 [![codecov](https://codecov.io/github/williamxb/vesbot/branch/main/graph/badge.svg?token=3FY62BRAD7)](https://codecov.io/github/williamxb/vesbot)
+[![Run tests](https://github.com/williamxb/vesbot/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/williamxb/vesbot/actions/workflows/test.yml)
+[![Docker](https://github.com/williamxb/vesbot/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/williamxb/vesbot/actions/workflows/docker-publish.yml)
 
 # 🚗 vesbot | Vehicle Enquiry Bot for Discord
 A Discord bot for checking UK vehicle details; MOT history, tax status, spurious history and more.
