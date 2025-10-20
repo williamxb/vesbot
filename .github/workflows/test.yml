@@ -72,6 +72,4 @@ jobs:
       - name: Test Summary
         uses: test-summary/action@v2
         with:
-          paths: |
-            coverage/
-            junit.xml
+          path: ./junit.xml
