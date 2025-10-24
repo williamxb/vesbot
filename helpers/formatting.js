@@ -96,7 +96,9 @@ const vedRates = [
 function createTaxCost(ves, mot) {
 	if (!mot?.registrationDate && !ves?.monthOfFirstRegistration) {
 		return { taxCost: 'Unknown' };
-	} else if (!ves?.monthOfFirstDvlaRegistration) {
+	}
+
+	if (ves?.monthOfFirstDvlaRegistration) {
 		// imported vehicle = PLG Vehicle for tax rates
 		return { taxCost: '(TC39) £345' };
 	}
