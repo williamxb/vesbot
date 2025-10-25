@@ -62,7 +62,7 @@ function createVehicleStatus(vehicle) {
  * @returns {string} null, or message if vehicle has been imported
  */
 function detectImportedVehicle(vehicle) {
-	if (vehicle.monthOfFirstDvlaRegistration)
+	if (vehicle?.monthOfFirstDvlaRegistration)
 		return { isImported: '**Imported vehicle**\n' };
 	return { isImported: '' };
 }
@@ -98,8 +98,10 @@ function createTaxCost(ves, mot) {
 		return { taxCost: 'Unknown' };
 	}
 
-	// imported vehicle = PLG Vehicle
-	if (ves.monthOfFirstDvlaRegistration) return { taxCost: '(TC39) £345' };
+	if (ves?.monthOfFirstDvlaRegistration) {
+		// imported vehicle = PLG Vehicle for tax rates
+		return { taxCost: '(TC39) £345' };
+	}
 
 	let taxCost = '';
 	const co2Emissions = ves?.co2Emissions;
@@ -169,13 +171,15 @@ function createTaxCost(ves, mot) {
  * @returns {string} description of tax status
  */
 function createTaxStatus(vehicle) {
-	if (!vehicle.taxStatus) return { taxStatus: 'Unknown', taxDue: 'Unknown' };
+	if (!vehicle?.taxStatus) return { taxStatus: 'Unknown', taxDue: 'Unknown' };
 
 	const currentDate = new Date().setHours(24, 0, 0, 0);
 	const taxStatus = vehicle.taxStatus;
-	let taxDue = 'Unknown'; // set default
+	let taxDue = 'Unknown';
 
 	if (vehicle.taxDueDate) {
+		// set default
+
 		const taxDueDate = new Date(vehicle.taxDueDate).setHours(24, 0, 0, 0);
 
 		switch (compareDesc(taxDueDate, currentDate)) {
@@ -204,7 +208,7 @@ function createTaxStatus(vehicle) {
  * @returns {string} description of MOT status
  */
 function createMotStatus(vehicle) {
-	if (!vehicle.motStatus) return { motStatus: 'Unknown', motDue: 'Unknown' };
+	if (!vehicle?.motStatus) return { motStatus: 'Unknown', motDue: 'Unknown' };
 
 	const currentDate = new Date().setHours(24, 0, 0, 0);
 	const motStatus = vehicle.motStatus;

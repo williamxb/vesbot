@@ -103,8 +103,8 @@ module.exports = {
 			colour: calculateColour(data.ves?.colour || data.vin?.Colour) || '',
 			fuelType: data.mot?.fuelType || data.ves?.fuelType || 'Unknown',
 			recall: data.mot?.hasOutstandingRecall || 'Unknown',
-			vin: `\`${data.vin?.VIN}\`` || null,
-			lastV5: data.ves?.dateOfLastV5CIssued || null,
+			vin: `\`${data.vin?.VIN}\`` || 'Unknown',
+			lastV5: data.ves?.dateOfLastV5CIssued || 'Unknown',
 			isImported: '', // calculated
 			taxStatus: '', // calculated
 			taxDue: '', // calculated
@@ -140,6 +140,8 @@ module.exports = {
 			{ name: 'MOT Status', value: embedData.motStatus, inline: true },
 			{ name: 'MOT Expiry', value: embedData.motDue, inline: true },
 		];
+
+		console.log(embedFields);
 
 		const embed = new EmbedBuilder()
 			.setTitle(
