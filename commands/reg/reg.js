@@ -12,7 +12,6 @@ const {
 	calculateColour,
 	createVehicleStatus,
 	detectImportedVehicle,
-	createVehicleYear,
 	createTaxStatus,
 	createTaxCost,
 	createMotStatus,
@@ -88,7 +87,11 @@ module.exports = {
 		}
 
 		const embedData = {
-			year: '', //calculated
+			year:
+				`${data.mot?.manufactureDate.split('-')[0]} ` ||
+				`${data.ves?.yearOfManufacture} ` ||
+				`${data.vin?.Year} ` ||
+				'', // add whitespace
 			make:
 				data.ves?.make ||
 				data.mot?.make ||
@@ -109,7 +112,7 @@ module.exports = {
 			motDue: '', // calculated
 			motDefectsSummary: '', //calculated
 			vehicleStatus: '', // calculated
-			taxCost: '', // @TODO: calculate tax based on year, engine size, co2
+			taxCost: '', // calculated
 			lez: '', // @TODO: calculate LEZ compliance with euro status
 			embedColour: '', // calculated
 		};
@@ -117,7 +120,6 @@ module.exports = {
 		// Create vehicleStatus and embedColour
 		Object.assign(
 			embedData,
-			createVehicleYear(data),
 			createVehicleStatus(data?.hpi, registration),
 			detectImportedVehicle(data?.ves),
 			createTaxStatus(data?.ves),
