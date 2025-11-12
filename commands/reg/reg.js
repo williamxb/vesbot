@@ -12,6 +12,7 @@ const {
 	calculateColour,
 	createVehicleStatus,
 	detectImportedVehicle,
+	createVehicleYear,
 	createTaxStatus,
 	createTaxCost,
 	createMotStatus,
@@ -87,17 +88,13 @@ module.exports = {
 		}
 
 		const embedData = {
-			year:
-				`${data.mot?.manufactureDate.split('-')[0]} ` ||
-				`${data.ves?.yearOfManufacture} ` ||
-				`${data.vin?.Year} ` ||
-				'', // add whitespace
+			year: '', //calculated
 			make:
 				data.ves?.make ||
 				data.mot?.make ||
 				data.vin?.Manufacturer ||
 				data.hpi?.make ||
-				'Unknown',
+				'<Unknown>',
 			model: data.hpi?.model || data.mot?.model || data.vin?.Model || 'Unknown',
 			trim: data.hpi?.derivativeShort || 'No trim level found',
 			colour: calculateColour(data.ves?.colour || data.vin?.Colour) || '',
@@ -118,12 +115,16 @@ module.exports = {
 		};
 
 		// Create vehicleStatus and embedColour
-		Object.assign(embedData, createVehicleStatus(data?.hpi, registration));
-		Object.assign(embedData, detectImportedVehicle(data?.ves));
-		Object.assign(embedData, createTaxStatus(data?.ves));
-		Object.assign(embedData, createTaxCost(data?.ves, data?.mot));
-		Object.assign(embedData, createMotStatus(data?.ves));
-		Object.assign(embedData, processMotDefects(data?.mot.motTests));
+		Object.assign(
+			embedData,
+			createVehicleYear(data),
+			createVehicleStatus(data?.hpi, registration),
+			detectImportedVehicle(data?.ves),
+			createTaxStatus(data?.ves),
+			createTaxCost(data?.ves, data?.mot),
+			createMotStatus(data?.ves),
+			processMotDefects(data?.mot.motTests),
+		);
 
 		const embedFields = [
 			{ name: 'Vehicle Status', value: embedData.vehicleStatus, inline: true },
