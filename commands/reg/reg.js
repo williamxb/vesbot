@@ -3,6 +3,7 @@ const {
 	InteractionContextType,
 	SlashCommandBuilder,
 	EmbedBuilder,
+	ApplicationIntegrationType,
 } = require('discord.js');
 const {
 	validateRegistration,
@@ -35,6 +36,10 @@ module.exports = {
 			InteractionContextType.Guild,
 			InteractionContextType.PrivateChannel,
 			InteractionContextType.BotDM,
+		)
+		.setIntegrationTypes(
+			ApplicationIntegrationType.UserInstall,
+			ApplicationIntegrationType.GuildInstall,
 		),
 
 	async execute(interaction) {
