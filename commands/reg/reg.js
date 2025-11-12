@@ -118,7 +118,7 @@ module.exports = {
 		};
 
 		// Create vehicleStatus and embedColour
-		Object.assign(embedData, createVehicleStatus(data?.hpi));
+		Object.assign(embedData, createVehicleStatus(data?.hpi, registration));
 		Object.assign(embedData, detectImportedVehicle(data?.ves));
 		Object.assign(embedData, createTaxStatus(data?.ves));
 		Object.assign(embedData, createTaxCost(data?.ves, data?.mot));
