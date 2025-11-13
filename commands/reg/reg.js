@@ -3,6 +3,7 @@ const {
 	InteractionContextType,
 	SlashCommandBuilder,
 	EmbedBuilder,
+	ApplicationIntegrationType,
 } = require('discord.js');
 const {
 	validateRegistration,
@@ -35,6 +36,10 @@ module.exports = {
 			InteractionContextType.Guild,
 			InteractionContextType.PrivateChannel,
 			InteractionContextType.BotDM,
+		)
+		.setIntegrationTypes(
+			ApplicationIntegrationType.UserInstall,
+			ApplicationIntegrationType.GuildInstall,
 		),
 
 	async execute(interaction) {
@@ -97,7 +102,7 @@ module.exports = {
 				data.mot?.make ||
 				data.vin?.Manufacturer ||
 				data.hpi?.make ||
-				'Unknown',
+				'<Unknown>',
 			model: data.hpi?.model || data.mot?.model || data.vin?.Model || 'Unknown',
 			trim: data.hpi?.derivativeShort || 'No trim level found',
 			colour: calculateColour(data.ves?.colour || data.vin?.Colour) || '',
@@ -112,18 +117,21 @@ module.exports = {
 			motDue: '', // calculated
 			motDefectsSummary: '', //calculated
 			vehicleStatus: '', // calculated
-			taxCost: '', // @TODO: calculate tax based on year, engine size, co2
+			taxCost: '', // calculated
 			lez: '', // @TODO: calculate LEZ compliance with euro status
 			embedColour: '', // calculated
 		};
 
 		// Create vehicleStatus and embedColour
-		Object.assign(embedData, createVehicleStatus(data?.hpi));
-		Object.assign(embedData, detectImportedVehicle(data?.ves));
-		Object.assign(embedData, createTaxStatus(data?.ves));
-		Object.assign(embedData, createTaxCost(data?.ves, data?.mot));
-		Object.assign(embedData, createMotStatus(data?.ves));
-		Object.assign(embedData, processMotDefects(data?.mot.motTests));
+		Object.assign(
+			embedData,
+			createVehicleStatus(data?.hpi, registration),
+			detectImportedVehicle(data?.ves),
+			createTaxStatus(data?.ves),
+			createTaxCost(data?.ves, data?.mot),
+			createMotStatus(data?.ves),
+			processMotDefects(data?.mot.motTests),
+		);
 
 		const embedFields = [
 			{ name: 'Vehicle Status', value: embedData.vehicleStatus, inline: true },

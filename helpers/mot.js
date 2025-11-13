@@ -69,7 +69,7 @@ function formatDefectCounts(defectCounts) {
  */
 function processMotDefects(motTests) {
 	if (!motTests || motTests.length === 0) {
-		return { motDefectsSummary: 'No MOT history' };
+		return { motDefectsSummary: '❔ No MOT history' };
 	}
 
 	const currentYear = new Date().getFullYear();
@@ -91,7 +91,7 @@ function processMotDefects(motTests) {
 		}
 	}
 
-	if (!motDefectsSummary) motDefectsSummary = 'No MOT fails';
+	if (!motDefectsSummary) motDefectsSummary = '✅ No MOT fails';
 
 	return { motDefectsSummary: motDefectsSummary };
 }

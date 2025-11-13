@@ -55,7 +55,8 @@ describe('createVehicleStatus', () => {
 			stolen: false,
 			writeOffCategory: 'none',
 		};
-		const result = createVehicleStatus(vehicle);
+		const registration = 'AB12CDE';
+		const result = createVehicleStatus(vehicle, registration);
 		expect(result.vehicleStatus).toBe('Clean ✨');
 		expect(result.embedColour).toBe(0x00b67a);
 	});
@@ -66,7 +67,8 @@ describe('createVehicleStatus', () => {
 			stolen: false,
 			writeOffCategory: 'none',
 		};
-		const result = createVehicleStatus(vehicle);
+		const registration = 'AB12CDE';
+		const result = createVehicleStatus(vehicle, registration);
 		expect(result.vehicleStatus).toBe('**Scrapped**');
 		expect(result.embedColour).toBe(0xb11212);
 	});
@@ -77,7 +79,8 @@ describe('createVehicleStatus', () => {
 			stolen: true,
 			writeOffCategory: 'none',
 		};
-		const result = createVehicleStatus(vehicle);
+		const registration = 'AB12CDE';
+		const result = createVehicleStatus(vehicle, registration);
 		expect(result.vehicleStatus).toBe('**Stolen**');
 		expect(result.embedColour).toBe(0xb11212);
 	});
@@ -88,8 +91,21 @@ describe('createVehicleStatus', () => {
 			stolen: false,
 			writeOffCategory: 'S',
 		};
-		const result = createVehicleStatus(vehicle);
+		const registration = 'AB12CDE';
+		const result = createVehicleStatus(vehicle, registration);
 		expect(result.vehicleStatus).toBe('**Write-off - CAT S**');
+		expect(result.embedColour).toBe(0xb11212);
+	});
+
+	test('should handle Q plated vehicles', () => {
+		const vehicle = {
+			scrapped: false,
+			stolen: false,
+			writeOffCategory: 'none'
+		}
+		const registration = 'Q123ABC';
+		const result = createVehicleStatus(vehicle, registration);
+		expect(result.vehicleStatus).toBe('**Q Plate**');
 		expect(result.embedColour).toBe(0xb11212);
 	});
 
@@ -100,7 +116,8 @@ describe('createVehicleStatus', () => {
 				stolen: false,
 				writeOffCategory: 'B',
 			};
-			const result = createVehicleStatus(vehicle);
+			const registration = 'AB12CDE';
+			const result = createVehicleStatus(vehicle, registration);
 			expect(result.vehicleStatus).toBe('**Scrapped**, **Write-off - CAT B**');
 			expect(result.embedColour).toBe(0xb11212);
 		});
@@ -111,7 +128,8 @@ describe('createVehicleStatus', () => {
 				stolen: true,
 				writeOffCategory: 'none',
 			};
-			const result = createVehicleStatus(vehicle);
+			const registration = 'AB12CDE';
+			const result = createVehicleStatus(vehicle, registration);
 			expect(result.vehicleStatus).toBe('**Stolen**, **Scrapped**');
 			expect(result.embedColour).toBe(0xb11212);
 		});
@@ -122,7 +140,8 @@ describe('createVehicleStatus', () => {
 				stolen: true,
 				writeOffCategory: 'N',
 			};
-			const result = createVehicleStatus(vehicle);
+			const registration = 'AB12CDE';
+			const result = createVehicleStatus(vehicle, registration);
 			expect(result.vehicleStatus).toBe('**Stolen**, **Write-off - CAT N**');
 			expect(result.embedColour).toBe(0xb11212);
 		});
@@ -133,7 +152,8 @@ describe('createVehicleStatus', () => {
 				stolen: true,
 				writeOffCategory: 'A',
 			};
-			const result = createVehicleStatus(vehicle);
+			const registration = 'AB12CDE';
+			const result = createVehicleStatus(vehicle, registration);
 			expect(result.vehicleStatus).toBe(
 				'**Stolen**, **Scrapped**, **Write-off - CAT A**',
 			);

@@ -29,22 +29,33 @@ function calculateColour(colour) {
 /**
  * Create vehicle status and embed colour
  * @param {Object} vehicle data from AT API
+ * @param {string} vehicle registration
  * @returns {Object} vehicleStatus string and embedColour hex code
  */
-function createVehicleStatus(vehicle) {
-	if (!vehicle) {
+function createVehicleStatus(vehicle, registration) {
+	if (!vehicle || !registration) {
 		return { vehicleStatus: 'Unknown', embedColour: 0x0000ff };
+	}
+
+	vehicle.qPlate = registration.startsWith('Q');
+
+	if (registration.startsWith('Q') === true) {
+		vehicle.qPlate = true;
+	} else {
+		vehicle.qPlate = false;
 	}
 
 	if (
 		vehicle.stolen === false &&
 		vehicle.scrapped === false &&
-		vehicle.writeOffCategory === 'none'
+		vehicle.writeOffCategory === 'none' &&
+		vehicle.qPlate === false
 	) {
 		return { vehicleStatus: 'Clean ✨', embedColour: 0x00b67a };
 	}
 
 	const statusMap = [
+		vehicle.qPlate ? '**Q Plate**' : null,
 		vehicle.stolen ? '**Stolen**' : null,
 		vehicle.scrapped ? '**Scrapped**' : null,
 		vehicle.writeOffCategory !== 'none'
@@ -54,6 +65,17 @@ function createVehicleStatus(vehicle) {
 
 	const status = statusMap.join(', ');
 	return { vehicleStatus: status, embedColour: 0xb11212 };
+}
+
+/**
+ * Create vehicle year
+ * @param {Object} entire response from all successful APIs
+ * @returns {string} // year of vehicle
+ * @TODO string or int?
+ */
+function createVehicleYear(data) {
+	if (data?.mot?.manufactureDate) return data.mot.manufactureDate.split('-')[0];
+	return `${data.ves?.yearOfManufacture} ` || `${data.vin?.Year} ` || ''; // empty string if no year
 }
 
 /**
@@ -135,7 +157,7 @@ function createTaxCost(ves, mot) {
 			taxCost = '£195';
 		}
 	} else if (compareDesc(regAfter2001, registrationDate) === 1) {
-		if (!ves.co2Emissions) return { taxCost: 'Unknown' };
+		if (!ves?.co2Emissions) return { taxCost: 'Unknown' };
 
 		for (const rate of vedRates) {
 			if (co2Emissions <= rate.co2) {
@@ -238,6 +260,7 @@ function createMotStatus(vehicle) {
 module.exports = {
 	calculateColour,
 	createVehicleStatus,
+	createVehicleYear,
 	detectImportedVehicle,
 	createTaxStatus,
 	createTaxCost,

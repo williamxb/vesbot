@@ -4,7 +4,7 @@ describe('processMotDefects', () => {
 	test('should handle undefined and null inputs', () => {
 		const motTests = [];
 		result = processMotDefects(motTests);
-		expect(result).toStrictEqual({ motDefectsSummary: 'No MOT history' });
+		expect(result).toStrictEqual({ motDefectsSummary: '❔ No MOT history' });
 	});
 
 	test('should detect if vehicle has had no major, dangerous or PRS defects', () => {
@@ -47,7 +47,7 @@ describe('processMotDefects', () => {
 			},
 		];
 		const result = processMotDefects(motTests);
-		expect(result).toStrictEqual({ motDefectsSummary: 'No MOT fails' });
+		expect(result).toStrictEqual({ motDefectsSummary: '✅ No MOT fails' });
 	});
 
 	test('should return other for unmatched categories', () => {
@@ -120,7 +120,7 @@ describe('processMotDefects', () => {
 			},
 		];
 		const result = processMotDefects(motTests);
-		expect(result).toStrictEqual({ motDefectsSummary: 'No MOT fails' });
+		expect(result).toStrictEqual({ motDefectsSummary: '✅ No MOT fails' });
 	});
 
 	test('should output a summary if vehicle has failed an MOT', () => {
