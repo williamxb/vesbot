@@ -65,7 +65,9 @@ function createVehicleStatus(vehicle, registration) {
 
 	const status = statusMap.join(', ');
 	return { vehicleStatus: status, embedColour: 0xb11212 };
-} /**
+}
+
+/**
  * Create vehicle year
  * @param {Object} entire response from all successful APIs
  * @returns {string} // year of vehicle
@@ -155,7 +157,7 @@ function createTaxCost(ves, mot) {
 			taxCost = '£195';
 		}
 	} else if (compareDesc(regAfter2001, registrationDate) === 1) {
-		if (!ves.co2Emissions) return { taxCost: 'Unknown' };
+		if (!ves?.co2Emissions) return { taxCost: 'Unknown' };
 
 		for (const rate of vedRates) {
 			if (co2Emissions <= rate.co2) {
