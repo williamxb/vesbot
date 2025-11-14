@@ -68,12 +68,16 @@ module.exports = {
 		let data, status;
 		try {
 			response = await fetchVehicleData(registration, apiConfig);
+			console.log(`response = ${response}`);
 			data = response.data;
 			status = response.status;
 		} catch (error) {
-			notify('critical', error);
+			// notify('critical', error);
+			console.log(`error: ${error}`);
 			const embed = new EmbedBuilder()
-				.setTitle(`An error occured.`)
+				.setTitle(`An error occured fetching vehicle data.`)
+				.setDescription('The registration may not exist.')
+				.setFooter(registration)
 				.setColor(0xffaa00);
 			return interaction.editReply({ embeds: [embed] });
 		}
