@@ -169,7 +169,7 @@ async function fetchVehicleData(registration, apiConfig) {
 
 	if (Object.keys(successful).length === 0) {
 		notify('critical', `All APIs failed for vehicle ${registration}`);
-		throw new Error('No data available');
+		throw new Error(`All APIs failed for vehicle ${registration}`);
 	}
 
 	return { data: successful, status: listApiStatus };
