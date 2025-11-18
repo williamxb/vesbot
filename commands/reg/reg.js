@@ -76,8 +76,7 @@ module.exports = {
 			console.log(`error: ${error}`);
 			const embed = new EmbedBuilder()
 				.setTitle(`An error occured fetching vehicle data.`)
-				.setDescription('The registration may not exist.')
-				.setFooter(registration)
+				.setDescription(`Registration \`${registration}\` was not found.`)
 				.setColor(0xffaa00);
 			return interaction.editReply({ embeds: [embed] });
 		}
