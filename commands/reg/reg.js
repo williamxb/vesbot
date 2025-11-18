@@ -110,7 +110,7 @@ module.exports = {
 			colour: calculateColour(data.ves?.colour || data.vin?.Colour) || '',
 			fuelType: data.mot?.fuelType || data.ves?.fuelType || 'Unknown',
 			recall: data.mot?.hasOutstandingRecall || 'Unknown',
-			vin: `\`${data.vin?.VIN}\`` || 'Unknown',
+			vin: data.vin?.VIN ? `\`${data.vin?.VIN}\`` : 'Unknown',
 			lastV5: data.ves?.dateOfLastV5CIssued || 'Unknown',
 			isImported: '', // calculated
 			taxStatus: '', // calculated
