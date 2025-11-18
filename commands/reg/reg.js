@@ -18,7 +18,6 @@ const {
 	createMotStatus,
 } = require('../../helpers/formatting');
 const { fetchVehicleData } = require('../../helpers/apis');
-const { notify } = require('../../helpers/notify');
 const { processMotDefects } = require('../../helpers/mot');
 
 // Embed builder and command handler
