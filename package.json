@@ -8,7 +8,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:ci": "NODE_OPTIONS= jest --ci --reporters=default --reporters=jest-junit"
+    "test:ci": "jest --ci --reporters=default --reporters=jest-junit"
   },
   "keywords": [],
   "author": "Will K <will@wknight.dev>",
@@ -17,7 +17,7 @@
   "dependencies": {
     "@azure/msal-node": "^3.8",
     "date-fns": "^4.1",
-    "discord.js": "^14.24",
+    "discord.js": "^14",
     "dotenv": "^17.2"
   },
   "devDependencies": {
