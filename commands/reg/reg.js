@@ -1,23 +1,14 @@
 require('dotenv').config();
-const {
-	InteractionContextType,
-	SlashCommandBuilder,
-	EmbedBuilder,
-	ApplicationIntegrationType,
-} = require('discord.js');
-const {
-	validateRegistration,
-	sanitiseInput,
-} = require('../../helpers/validation');
-const {
-	calculateColour,
-	createVehicleStatus,
-	detectImportedVehicle,
-	createTaxStatus,
-	createTaxCost,
-	createMotStatus,
-} = require('../../helpers/formatting');
-const { fetchVehicleData } = require('../../helpers/apis');
+const { InteractionContextType, SlashCommandBuilder, EmbedBuilder, ApplicationIntegrationType } = require('discord.js');
+const { validateRegistration } = require('../../helpers/validation/validateRegistration');
+const { sanitiseInput } = require('../../helpers/validation/sanitiseInput');
+const { calculateColour } = require('../../helpers/formatting/calculateColour');
+const { createVehicleStatus } = require('../../helpers/formatting/createVehicleStatus');
+const { createImportStatus } = require('../../helpers/formatting/createImportStatus');
+const { createTaxStatus } = require('../../helpers/formatting/createTaxStatus');
+const { createTaxCost } = require('../../helpers/formatting/createTaxCost');
+const { createMotStatus } = require('../../helpers/formatting/createMotStatus');
+const { fetchVehicleData } = require('../../helpers/apis/fetchVehicleData');
 const { processMotDefects } = require('../../helpers/mot');
 
 // Embed builder and command handler
@@ -60,14 +51,13 @@ module.exports = {
 
 		const apiConfig = {
 			vesApiKey: process.env.VES_API_KEY,
-			vinUrl: process.env.VIN_URL,
 			motApiKey: process.env.MOT_API_KEY,
 		};
 
 		let data, status;
 		try {
 			response = await fetchVehicleData(registration, apiConfig);
-			console.log(`response = ${response}`);
+			console.log(`response = ${JSON.stringify(response)}`);
 			data = response.data;
 			status = response.status;
 		} catch (error) {
@@ -99,18 +89,13 @@ module.exports = {
 				`${data.ves?.yearOfManufacture} ` ||
 				`${data.vin?.Year} ` ||
 				'', // add whitespace
-			make:
-				data.ves?.make ||
-				data.mot?.make ||
-				data.vin?.Manufacturer ||
-				data.hpi?.make ||
-				'<Unknown>',
+			make: data.ves?.make || data.mot?.make || data.vin?.Manufacturer || data.hpi?.make || '<Unknown>',
 			model: data.hpi?.model || data.mot?.model || data.vin?.Model || 'Unknown',
 			trim: data.hpi?.derivativeShort || 'No trim level found',
 			colour: calculateColour(data.ves?.colour || data.vin?.Colour) || '',
 			fuelType: data.mot?.fuelType || data.ves?.fuelType || 'Unknown',
 			recall: data.mot?.hasOutstandingRecall || 'Unknown',
-			vin: data.vin?.VIN ? `\`${data.vin?.VIN}\`` : 'Unknown',
+			vin: data.vin?.plate_lookup.vin ? `\`${data.vin.plate_lookup.vin}\`` : 'Unknown',
 			lastV5: data.ves?.dateOfLastV5CIssued || 'Unknown',
 			isImported: '', // calculated
 			taxStatus: '', // calculated
@@ -128,11 +113,11 @@ module.exports = {
 		Object.assign(
 			embedData,
 			createVehicleStatus(data?.hpi, registration),
-			detectImportedVehicle(data?.ves),
+			createImportStatus(data?.ves),
 			createTaxStatus(data?.ves),
 			createTaxCost(data?.ves, data?.mot),
 			createMotStatus(data?.ves),
-			processMotDefects(data?.mot.motTests),
+			processMotDefects(data?.mot?.motTests),
 		);
 
 		const embedFields = [
