@@ -1,8 +1,8 @@
 const { notify } = require('../notify');
 const { fetchVES } = require('./dvlaVES');
 const { fetchMOT } = require('./dvsaMOT');
-const { fetchAT } = require('./at');
 const { fetchEuro } = require('./hpiEuro');
+const { fetchAT } = require('./at');
 const { fetchVIN } = require('./vin');
 
 /**
@@ -22,9 +22,9 @@ async function fetchVehicleData(registration, apiConfig) {
 		fetchVIN(registration),
 	]);
 
+	// Create objects for API results
 	const successful = {};
 	const failed = {};
-	let listApiStatus = '';
 
 	results.forEach((result, i) => {
 		const apiName = ['ves', 'mot', 'euro', 'hpi', 'vin'];
@@ -32,25 +32,30 @@ async function fetchVehicleData(registration, apiConfig) {
 		if (result.status === 'fulfilled') {
 			successful[apiName[i]] = result.value;
 		} else {
-			failed[`api${i + 1}`] = result.reason.message;
-			listApiStatus += ` • ${apiName[i]} ${result.reason.message}`;
-			notify(
-				'warning',
-				`${apiName[i]} failed for ${registration}: ${result.reason.message}`,
-			);
+			failed[apiName[i]] = result.reason.toString()
 		}
 	});
 
-	console.log(
-		`${registration} ${Object.keys(successful).length}/${Object.keys(failed).length} ${listApiStatus}`,
-	);
-
+	// all APIs have failed - trigger error message
 	if (Object.keys(successful).length === 0) {
-		notify('critical', `All APIs failed for vehicle ${registration}`);
+		notify('warning', errors)
 		throw new Error(`All APIs failed for vehicle ${registration}`);
 	}
+	
+	let failedString = '\n';
 
-	return { data: successful, status: listApiStatus };
+	if (Object.keys(failed).length !== 0) {
+		let errors = `**${registration}** \n`;
+		let errorArray = [];
+		for(const [key, value] of Object.entries(failed)) {
+			errors += `**${key}**: ${value}\n`
+			errorArray.push(key)
+		}
+		notify('warning', errors)
+		failedString += `${errorArray.join(", ")} failed`
+	} 
+
+	return { data: successful, failed: failedString };
 }
 
 module.exports = { fetchVehicleData }

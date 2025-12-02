@@ -1,6 +1,6 @@
 /**
  * Create vehicle year
- * @param {Object} entire response from all successful APIs
+ * @param {Object} data entire response from all successful APIs
  * @returns {string} // year of vehicle
  */
 function createVehicleYear(data) {

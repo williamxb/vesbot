@@ -4,6 +4,7 @@ const { validateRegistration } = require('../../helpers/validation/validateRegis
 const { sanitiseInput } = require('../../helpers/validation/sanitiseInput');
 const { calculateColour } = require('../../helpers/formatting/calculateColour');
 const { createImportStatus } = require('../../helpers/formatting/createImportStatus');
+const { createLastV5 } = require('../../helpers/formatting/createLastV5');
 const { createMotStatus } = require('../../helpers/formatting/createMotStatus');
 const { createTaxCost } = require('../../helpers/formatting/createTaxCost');
 const { createTaxStatus } = require('../../helpers/formatting/createTaxStatus');
@@ -43,15 +44,13 @@ module.exports = {
 			motApiKey: process.env.MOT_API_KEY,
 		};
 
-		let data, status;
+		let data, failed;
 		try {
 			response = await fetchVehicleData(registration, apiConfig);
-			console.log(`response = ${JSON.stringify(response)}`);
 			data = response.data;
-			status = response.status;
+			failed = response.failed;
 		} catch (error) {
-			// notify('critical', error);
-			console.log(`error: ${error}`);
+			console.error(error);
 			const embed = new EmbedBuilder()
 				.setTitle(`An error occured fetching vehicle data.`)
 				.setDescription(`Registration \`${registration}\` was not found.`)
@@ -59,28 +58,26 @@ module.exports = {
 			return interaction.editReply({ embeds: [embed] });
 		}
 
-		if (data === null) {
+		if (Object.keys(data).length === 0) {
 			// Registration does not exist
 			const embed = new EmbedBuilder()
 				.setTitle(`Vehicle not found.`)
-				.addFields({
-					name: 'Is the registration correct?',
-					value: registration,
-					inline: true,
-				})
+				.addFields({ name: 'Is the registration correct?', value: registration, inline: true })
 				.setColor(0xffaa00);
 			return interaction.editReply({ embeds: [embed] });
 		}
 
+		console.log(data);
+
 		const embedData = {
-			make: data?.ves?.make || data?.mot?.make || data?.vin?.Manufacturer || data?.hpi?.make || 'Unknown Make',
-			model: data?.hpi?.model || data?.mot?.model || data?.vin?.Model || 'Unknown Model',
-			trim: data?.hpi?.derivativeShort || 'No trim level found',
-			colour: calculateColour(data?.ves?.colour || data?.vin?.Colour) || '',
+			make: data?.ves?.make || data?.mot?.make || data?.vin?.make || data?.hpi?.make || 'Unknown Make',
+			model: data?.hpi?.model || data?.mot?.model || data?.vin?.model || 'Unknown Model',
+			trim: data?.hpi?.derivativeShort || data?.vin?.description || 'No trim level found',
+			colour: calculateColour(data?.ves?.colour) || '',
 			fuelType: data?.mot?.fuelType || data?.ves?.fuelType || 'Unknown',
 			recall: data?.mot?.hasOutstandingRecall || 'Unknown',
-			vin: data?.vin?.plate_lookup.vin ? `\`${data.vin.plate_lookup.vin}\`` : 'Unknown',
-			lastV5: data?.ves?.dateOfLastV5CIssued || 'Unknown',
+			vin: data?.vin?.vin ? `\`${data.vin.vin}\`` : 'Unknown',
+			lastV5: '', // calculated
 			year: '', // calculated
 			isImported: '', // calculated
 			taxStatus: '', // calculated
@@ -94,12 +91,13 @@ module.exports = {
 			embedColour: '', // calculated
 		};
 
-		// Create vehicleStatus and embedColour
+		// Assign
 		Object.assign(
 			embedData,
 			createVehicleStatus(data?.hpi, registration),
 			createVehicleYear(data),
 			createImportStatus(data?.ves),
+			createLastV5(data?.ves),
 			createTaxStatus(data?.ves),
 			createTaxCost(data?.ves, data?.mot),
 			createMotStatus(data?.ves),
@@ -110,11 +108,7 @@ module.exports = {
 			{ name: 'Vehicle Status', value: embedData.vehicleStatus, inline: true },
 			{ name: 'VIN', value: embedData.vin, inline: true },
 			{ name: 'Last V5C', value: embedData.lastV5, inline: true },
-			{
-				name: 'Last 5 years:',
-				value: embedData.motDefectsSummary,
-				inline: false,
-			},
+			{ name: 'Last 5 years:', value: embedData.motDefectsSummary, inline: false },
 			{ name: 'Tax Status', value: embedData.taxStatus, inline: true },
 			{ name: 'Tax Expiry', value: embedData.taxDue, inline: true },
 			{ name: 'Tax Cost', value: embedData.taxCost, inline: true },
@@ -122,13 +116,11 @@ module.exports = {
 			{ name: 'MOT Expiry', value: embedData.motDue, inline: true },
 		];
 
-		console.log(embedFields);
-
 		const embed = new EmbedBuilder()
 			.setTitle(`${embedData.colour} ${embedData.year}${embedData.make} ${embedData.model}`)
 			.setDescription(`${embedData.isImported}${embedData.trim}`)
 			.addFields(embedFields)
-			.setFooter({ text: `${registration}${status}` })
+			.setFooter({ text: `${registration}${failed}` })
 			.setColor(embedData.embedColour);
 
 		return interaction.editReply({ embeds: [embed] });
