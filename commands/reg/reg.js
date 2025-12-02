@@ -3,11 +3,12 @@ const { InteractionContextType, SlashCommandBuilder, EmbedBuilder, ApplicationIn
 const { validateRegistration } = require('../../helpers/validation/validateRegistration');
 const { sanitiseInput } = require('../../helpers/validation/sanitiseInput');
 const { calculateColour } = require('../../helpers/formatting/calculateColour');
-const { createVehicleStatus } = require('../../helpers/formatting/createVehicleStatus');
 const { createImportStatus } = require('../../helpers/formatting/createImportStatus');
-const { createTaxStatus } = require('../../helpers/formatting/createTaxStatus');
-const { createTaxCost } = require('../../helpers/formatting/createTaxCost');
 const { createMotStatus } = require('../../helpers/formatting/createMotStatus');
+const { createTaxCost } = require('../../helpers/formatting/createTaxCost');
+const { createTaxStatus } = require('../../helpers/formatting/createTaxStatus');
+const { createVehicleStatus } = require('../../helpers/formatting/createVehicleStatus');
+const { createVehicleYear } = require('../../helpers/formatting/createVehicleYear');
 const { fetchVehicleData } = require('../../helpers/apis/fetchVehicleData');
 const { processMotDefects } = require('../../helpers/mot');
 
@@ -84,19 +85,15 @@ module.exports = {
 		}
 
 		const embedData = {
-			year:
-				`${data.mot?.manufactureDate.split('-')[0]} ` ||
-				`${data.ves?.yearOfManufacture} ` ||
-				`${data.vin?.Year} ` ||
-				'', // add whitespace
-			make: data.ves?.make || data.mot?.make || data.vin?.Manufacturer || data.hpi?.make || '<Unknown>',
-			model: data.hpi?.model || data.mot?.model || data.vin?.Model || 'Unknown',
-			trim: data.hpi?.derivativeShort || 'No trim level found',
-			colour: calculateColour(data.ves?.colour || data.vin?.Colour) || '',
-			fuelType: data.mot?.fuelType || data.ves?.fuelType || 'Unknown',
-			recall: data.mot?.hasOutstandingRecall || 'Unknown',
-			vin: data.vin?.plate_lookup.vin ? `\`${data.vin.plate_lookup.vin}\`` : 'Unknown',
-			lastV5: data.ves?.dateOfLastV5CIssued || 'Unknown',
+			make: data?.ves?.make || data?.mot?.make || data?.vin?.Manufacturer || data?.hpi?.make || 'Unknown Make',
+			model: data?.hpi?.model || data?.mot?.model || data?.vin?.Model || 'Unknown Model',
+			trim: data?.hpi?.derivativeShort || 'No trim level found',
+			colour: calculateColour(data?.ves?.colour || data?.vin?.Colour) || '',
+			fuelType: data?.mot?.fuelType || data?.ves?.fuelType || 'Unknown',
+			recall: data?.mot?.hasOutstandingRecall || 'Unknown',
+			vin: data?.vin?.plate_lookup.vin ? `\`${data.vin.plate_lookup.vin}\`` : 'Unknown',
+			lastV5: data?.ves?.dateOfLastV5CIssued || 'Unknown',
+			year: '', // calculated
 			isImported: '', // calculated
 			taxStatus: '', // calculated
 			taxDue: '', // calculated
@@ -113,6 +110,7 @@ module.exports = {
 		Object.assign(
 			embedData,
 			createVehicleStatus(data?.hpi, registration),
+			createVehicleYear(data),
 			createImportStatus(data?.ves),
 			createTaxStatus(data?.ves),
 			createTaxCost(data?.ves, data?.mot),
