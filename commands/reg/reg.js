@@ -18,28 +18,16 @@ module.exports = {
 		.setName('reg')
 		.setDescription('Check vehicle details and status')
 		.addStringOption((option) =>
-			option
-				.setName('registration')
-				.setDescription('Enter vehicle registration')
-				.setRequired(true),
+			option.setName('registration').setDescription('Enter vehicle registration').setRequired(true),
 		)
-		.setContexts(
-			InteractionContextType.Guild,
-			InteractionContextType.PrivateChannel,
-			InteractionContextType.BotDM,
-		)
-		.setIntegrationTypes(
-			ApplicationIntegrationType.UserInstall,
-			ApplicationIntegrationType.GuildInstall,
-		),
+		.setContexts(InteractionContextType.Guild, InteractionContextType.PrivateChannel, InteractionContextType.BotDM)
+		.setIntegrationTypes(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall),
 
 	async execute(interaction) {
 		// acknowledge interaction
 		await interaction.deferReply();
 
-		const registration = sanitiseInput(
-			interaction.options.getString('registration'),
-		);
+		const registration = sanitiseInput(interaction.options.getString('registration'));
 
 		if (!validateRegistration(registration)) {
 			// Input failed validation
@@ -137,9 +125,7 @@ module.exports = {
 		console.log(embedFields);
 
 		const embed = new EmbedBuilder()
-			.setTitle(
-				`${embedData.colour} ${embedData.year}${embedData.make} ${embedData.model}`,
-			)
+			.setTitle(`${embedData.colour} ${embedData.year}${embedData.make} ${embedData.model}`)
 			.setDescription(`${embedData.isImported}${embedData.trim}`)
 			.addFields(embedFields)
 			.setFooter({ text: `${registration}${status}` })

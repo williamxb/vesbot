@@ -15,9 +15,7 @@ const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs
-		.readdirSync(commandsPath)
-		.filter((file) => file.endsWith('.js'));
+	const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
@@ -25,9 +23,7 @@ for (const folder of commandFolders) {
 		if ('data' in command && 'execute' in command) {
 			client.commands.set(command.data.name, command);
 		} else {
-			console.warn(
-				`[WARNING] The command at ${filePath} is missing a required 'data' or 'execute' property.`,
-			);
+			console.warn(`[WARNING] The command at ${filePath} is missing a required 'data' or 'execute' property.`);
 		}
 	}
 }
