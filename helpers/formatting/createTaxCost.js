@@ -1,4 +1,4 @@
-const { formatDistance, compareDesc } = require('date-fns');
+const { add, compareDesc } = require('date-fns');
 
 /**
  * VED rates for calculating vehicle tax cost
