@@ -25,7 +25,8 @@
 	},
 	"javascript": {
 		"formatter": {
-			"quoteStyle": "single"
+			"quoteStyle": "single",
+			"lineWidth": 120
 		}
 	},
 	"assist": {

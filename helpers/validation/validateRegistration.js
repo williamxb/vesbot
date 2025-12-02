@@ -1,13 +1,4 @@
 /**
- * Strip non-alphanumeric characters and return as upper case.
- * @param {string} input raw input
- * @returns {string} sanitised output (non-alphanumeric stripped, uppercase)
- */
-function sanitiseInput(input) {
-	return input.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-}
-
-/**
  * Validates if registration is a correct UK format.
  * @param {string} registration registration input to validate
  * @returns {boolean} if valid returns true
@@ -19,7 +10,4 @@ function validateRegistration(registration) {
 	return regex.test(registration);
 }
 
-module.exports = {
-	sanitiseInput,
-	validateRegistration,
-};
+module.exports = { validateRegistration }
