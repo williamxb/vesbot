@@ -17,8 +17,7 @@ async function fetchVIN(registration) {
   });
 
 	const headers = {
-		"accept": "application/json, text/plain, */*",
-		"accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+		"accept": "application/json",
 		"content-type": "application/json;charset=UTF-8",
 	};
 
@@ -33,8 +32,16 @@ async function fetchVIN(registration) {
 	if (!response.ok) {
 		throw new Error(response.status);
 	}
+	
+	const data = await response.json();
+	
+	// yes,    HTTP/1.1 200 OK
+	// but     {"status": "error"}
+	if (data?.status == "error") {
+		throw new Error(data.key);
+	}
 
-	return await response.json();
+	return data.plate_lookup;
 }
 
 module.exports = { fetchVIN }
