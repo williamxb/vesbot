@@ -1,5 +1,10 @@
 const { compareAsc } = require('date-fns');
 
+/**
+ * Convert string to TitleCase
+ * @param {string} str string to TitleCase
+ * @returns TitleCase string
+ */
 function toTitleCase(str) {
   if (!str) return ""
   return str
