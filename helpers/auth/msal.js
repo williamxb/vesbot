@@ -1,4 +1,3 @@
-require('dotenv').config();
 const msal = require('@azure/msal-node');
 
 const config = {

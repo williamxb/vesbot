@@ -1,10 +1,11 @@
-require('dotenv').config();
+// require('dotenv').config();
 const { InteractionContextType, SlashCommandBuilder, EmbedBuilder, ApplicationIntegrationType } = require('discord.js');
 const { validateRegistration } = require('../../helpers/validation/validateRegistration');
 const { sanitiseInput } = require('../../helpers/validation/sanitiseInput');
 const { calculateColour } = require('../../helpers/formatting/calculateColour');
 const { createImportStatus } = require('../../helpers/formatting/createImportStatus');
 const { createLastV5 } = require('../../helpers/formatting/createLastV5');
+const { createLEZCompliance } = require('../../helpers/formatting/createLEZCompliance');
 const { createMotStatus } = require('../../helpers/formatting/createMotStatus');
 const { createTaxCost } = require('../../helpers/formatting/createTaxCost');
 const { createTaxStatus } = require('../../helpers/formatting/createTaxStatus');
@@ -67,7 +68,7 @@ module.exports = {
 			return interaction.editReply({ embeds: [embed] });
 		}
 
-		console.log(data);
+		// console.log(data);
 
 		const embedData = {
 			make: data?.ves?.make || data?.mot?.make || data?.vin?.make || data?.hpi?.make || 'Unknown Make',
@@ -75,7 +76,6 @@ module.exports = {
 			trim: data?.hpi?.derivativeShort || data?.vin?.description || 'No trim level found',
 			colour: calculateColour(data?.ves?.colour) || '',
 			fuelType: data?.mot?.fuelType || data?.ves?.fuelType || 'Unknown',
-			recall: data?.mot?.hasOutstandingRecall || 'Unknown',
 			vin: data?.vin?.vin ? `\`${data.vin.vin}\`` : 'Unknown',
 			lastV5: '', // calculated
 			year: '', // calculated
@@ -98,6 +98,7 @@ module.exports = {
 			createVehicleYear(data),
 			createImportStatus(data?.ves),
 			createLastV5(data?.ves),
+			createLEZCompliance(data?.ves, data?.mot, data?.euro),
 			createTaxStatus(data?.ves),
 			createTaxCost(data?.ves, data?.mot),
 			createMotStatus(data?.ves),
@@ -114,6 +115,7 @@ module.exports = {
 			{ name: 'Tax Cost', value: embedData.taxCost, inline: true },
 			{ name: 'MOT Status', value: embedData.motStatus, inline: true },
 			{ name: 'MOT Expiry', value: embedData.motDue, inline: true },
+			{ name: 'LEZ Compliance', value: embedData.lez, inline: true },
 		];
 
 		const embed = new EmbedBuilder()
