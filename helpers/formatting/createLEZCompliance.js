@@ -45,7 +45,7 @@ function createLEZCompliance(data) {
     if (fuelType === "Petrol") {
       const re = /[4-6]+/g;
       if (re.test(euroStatus)) {
-        return { lezTitle: "LEZ ✅", lezStatus: "✅ Meets Euro 4" }
+        return { lezTitle: "LEZ ✅", lezStatus: "Meets Euro 4" }
       } else {
         return { lezTitle: "Not LEZ Compliant ❌", lezStatus: `${euroStatus} ${fuelType}` }
       }
@@ -55,7 +55,7 @@ function createLEZCompliance(data) {
     if (fuelType === "Diesel") {
       const re = /[6]+/g;
       if (re.test(euroStatus)) {
-        return { lezTitle: "LEZ ❌", lezStatus: "✅ Meets Euro 6" }
+        return { lezTitle: "LEZ ❌", lezStatus: "Meets Euro 6" }
       } else {
         return { lezTitle: "Not LEZ Compliant ❌", lezStatus: `${euroStatus} ${fuelType}` }
       }
