@@ -9,6 +9,8 @@ A Discord bot for checking UK vehicle details; MOT history, tax status, spurious
 ### Discord command:
 `/reg <registration>` - Look up registration
 
+![](./example.jpg "Example output")
+
 ## Prerequisites
  - Node.js v25, npm
  - [Discord App](https://discord.com/developers/docs/quick-start/getting-started)
