@@ -3,11 +3,21 @@
 [![Docker](https://github.com/williamxb/vesbot/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/williamxb/vesbot/actions/workflows/docker-publish.yml)
 
 # 🚗 vesbot | Vehicle Enquiry Bot for Discord
-A Discord bot for checking UK vehicle details; MOT history, tax status, spurious history and more.
+A Discord bot for checking UK vehicle details; MOT history, tax status, spurious history, and more.
+
+  - Make, model, and spec/description
+  - Vehicle status: Category write off, stolen, scrapped
+  - Date of last V5C issue
+  - Overview of MOT history
+  - Tax and MOT status and expiry
+  - Tax cost if calculable
+  - LEZ compliance estimate if calculable
 
 ## Usage
 ### Discord command:
 `/reg <registration>` - Look up registration
+
+![](./example.jpg "Example output")
 
 ## Prerequisites
  - Node.js v25, npm
