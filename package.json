@@ -15,7 +15,7 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "@azure/msal-node": "^3.8",
+    "@azure/msal-node": "^5.0",
     "date-fns": "^4.1",
     "discord.js": "^14",
     "dotenv": "^17.2"
