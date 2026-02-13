@@ -1,4 +1,4 @@
-const { formatDistance, compareDesc } = require('date-fns');
+const { formatDistance, compareDesc, startOfDay } = require('date-fns');
 
 /**
  * Create vehicle tax status
@@ -8,14 +8,12 @@ const { formatDistance, compareDesc } = require('date-fns');
 function createTaxStatus(vehicle) {
   if (!vehicle?.taxStatus) return { taxStatus: 'Unknown', taxDue: 'Unknown' };
 
-  const currentDate = new Date().setHours(24, 0, 0, 0);
   const taxStatus = vehicle.taxStatus;
   let taxDue = 'Unknown';
-
+  
   if (vehicle.taxDueDate) {
-    // set default
-
-    const taxDueDate = new Date(vehicle.taxDueDate).setHours(24, 0, 0, 0);
+    const currentDate = startOfDay(new Date());
+    const taxDueDate = startOfDay(new Date(vehicle.taxDueDate));
 
     switch (compareDesc(taxDueDate, currentDate)) {
       case -1: // current

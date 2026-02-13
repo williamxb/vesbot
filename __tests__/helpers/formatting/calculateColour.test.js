@@ -1,4 +1,4 @@
-const { calculateColour } = require('../../../helpers/formatting/calculateColour');
+const { calculateColour } = require('/helpers/formatting/calculateColour');
 
 describe('calculateColour', () => {
   test('should return emoji for known colours', () => {

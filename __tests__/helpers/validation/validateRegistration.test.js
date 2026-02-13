@@ -1,4 +1,4 @@
-const { validateRegistration } = require('../../../helpers/validation/validateRegistration');
+const { validateRegistration } = require('/helpers/validation/validateRegistration');
 
 describe('validateRegistration', () => {
   describe('test valid registrations', () => {

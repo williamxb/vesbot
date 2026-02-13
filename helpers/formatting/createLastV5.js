@@ -8,8 +8,8 @@ const { formatDistance, format } = require('date-fns');
 function createLastV5(vehicle) {
   if (!vehicle?.dateOfLastV5CIssued) return { lastV5: 'Unknown' };
 
-  const currentDate = new Date().setHours(24, 0, 0, 0);
-  const lastV5Date = new Date(vehicle.dateOfLastV5CIssued).setHours(24, 0, 0, 0);
+  const currentDate = new Date();
+  const lastV5Date = new Date(vehicle.dateOfLastV5CIssued);
 
   return { lastV5: `${formatDistance(lastV5Date, currentDate, { addSuffix: true })}\n${format(lastV5Date, 'dd/MM/yyyy')}`};
 }

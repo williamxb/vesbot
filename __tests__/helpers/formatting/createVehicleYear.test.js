@@ -1,4 +1,4 @@
-const { createVehicleYear } = require('../../../helpers/formatting/createVehicleYear');
+const { createVehicleYear } = require('/helpers/formatting/createVehicleYear');
 
 describe('createVehicleStatus', () => {
   describe('should handle empty input', () => {
