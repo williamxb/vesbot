@@ -17,7 +17,7 @@ function toTitleCase(str) {
 }
 
 /**
- * Create likely LEZ compliance
+ * Estimate LEZ compliance
  * @param {Object} data entire response from all successful APIs
  * @returns {string} LEZ compliance
  */
@@ -71,16 +71,14 @@ function createLEZCompliance(data) {
 
   // vehicle date setup
   const vehicleDateRaw = data?.ves?.manufactureDate || data?.mot?.manufactureDate;
-  const vehicleDate = new Date(vehicleDateRaw).setHours(0, 0, 0, 0);
+  const vehicleDate = new Date(vehicleDateRaw);
 
   // compliance dates setup
   // vehicle manufactured between introduction and enforcement MAY be compliant!
-  const euro4Introduced = new Date('2005-01-01').setHours(0, 0, 0, 0);
-  const euro4Mandatory = new Date('2006-01-01').setHours(0, 0, 0, 0);
-  const euro6Introduced = new Date('2015-09-01').setHours(0, 0, 0, 0);
-  const euro6Mandatory = new Date('2016-09-01').setHours(0, 0, 0, 0);
-
-  console.log(fuelType)
+  const euro4Introduced = new Date('2005-01-01');
+  const euro4Mandatory = new Date('2006-01-01');
+  const euro6Introduced = new Date('2015-09-01');
+  const euro6Mandatory = new Date('2016-09-01');
 
   switch (fuelType) {
     case "Petrol":
@@ -97,7 +95,7 @@ function createLEZCompliance(data) {
       }
 
       else {
-        return { lezTitle: "Not LEZ Compliant ❌", lezStatus: `Pre-Euro 4 ${fuelType}\nNon-compliant` }
+        return { lezTitle: "Not LEZ Compliant ❌", lezStatus: `Pre-Euro 4 ${fuelType}` }
       }
 
     case "Diesel":

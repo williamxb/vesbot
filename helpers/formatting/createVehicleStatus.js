@@ -11,12 +11,6 @@ function createVehicleStatus(vehicle, registration) {
 
 	vehicle.qPlate = registration.startsWith('Q');
 
-	if (registration.startsWith('Q') === true) {
-		vehicle.qPlate = true;
-	} else {
-		vehicle.qPlate = false;
-	}
-
 	if (
 		vehicle.stolen === false &&
 		vehicle.scrapped === false &&

@@ -41,21 +41,11 @@ function createTaxCost(ves, mot) {
 	const engineCapacity = ves?.engineCapacity || mot?.engineSize;
 
 	const regAfter2017 = new Date('2017-04-01');
-	regAfter2017.setHours(0, 0, 0, 0);
-
 	const emissionsMarch2006Cutoff = new Date('2006-03-23');
-	emissionsMarch2006Cutoff.setHours(0, 0, 0, 0);
-
 	const regAfter2001 = new Date('2001-03-01');
-	regAfter2001.setHours(0, 0, 0, 0);
 
-	const registrationDate = new Date(
-		mot?.registrationDate || `${ves?.monthOfFirstRegistration}-01`,
-	);
-	registrationDate.setHours(12, 0, 0, 0);
-
+	const registrationDate = new Date(mot?.registrationDate || `${ves?.monthOfFirstRegistration}-01`,);
 	const currentDate = new Date();
-	currentDate.setHours(0, 0, 0, 0);
 
 	if (compareDesc(regAfter2017, registrationDate) === 1) {
 		const luxTaxDateThreshold = add(registrationDate, { years: 5 });

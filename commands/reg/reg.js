@@ -47,7 +47,7 @@ module.exports = {
 
 		let data, failed;
 		try {
-			response = await fetchVehicleData(registration, apiConfig);
+			const response = await fetchVehicleData(registration, apiConfig);
 			data = response.data;
 			failed = response.failed;
 		} catch (error) {

@@ -8,12 +8,12 @@ const { formatDistance, compareDesc } = require('date-fns');
 function createMotStatus(vehicle) {
 	if (!vehicle?.motStatus) return { motStatus: 'Unknown', motDue: 'Unknown' };
 
-	const currentDate = new Date().setHours(24, 0, 0, 0);
+	const currentDate = new Date();
 	const motStatus = vehicle.motStatus;
 	let motDue = '';
 
 	if (vehicle.motExpiryDate) {
-		const motExpiryDate = new Date(vehicle.motExpiryDate).setHours(24, 0, 0, 0);
+		const motExpiryDate = new Date(vehicle.motExpiryDate).;
 
 		switch (compareDesc(motExpiryDate, currentDate)) {
 			case -1: // current
