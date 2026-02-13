@@ -1,4 +1,4 @@
-const { add, compareDesc } = require('date-fns');
+const { add, isBefore, startOfDay } = require('date-fns');
 
 /**
  * VED rates for calculating vehicle tax cost
@@ -21,71 +21,77 @@ const vedRates = [
 ];
 
 /**
- * Create vehicle tax cost and import likeliness
+ * Cutoff dates for different VED calculations
+ */
+const CUTOFF_2017 = startOfDay(new Date('2017-04-01'));
+const CUTOFF_2006 = startOfDay(new Date('2006-03-23'));
+const CUTOFF_2001 = startOfDay(new Date('2001-03-01'));
+
+/**
+ * Create registration date
+ * @param {Object} ves data from DVSA MOT API
+ * @param {Object} mot data from DVLA VES API
+ * @returns {Date} registration date
+ */
+function parseRegistrationDate(mot, ves) {
+	const dateString = mot?.registrationDate ?? (ves?.monthOfFirstRegistration && `${ves.monthOfFirstRegistration}-01`);
+	
+	// no data, nothing to return
+	if (!dateString) return null;
+	
+	// protect against malforced data - invalid dates detected with isNan
+	const parsedDate = startOfDay(new Date(dateString));
+	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+}
+
+/**
+ * Calculate VED cost
+ * @param {Number} co2Emissions 
+ * @returns {string} VED cost
+ */
+function getVedRate(co2Emissions) {
+	const rate = vedRates.find(r => co2Emissions <= r.co2);
+	return rate?.rate;
+}
+
+/**
+ * Create vehicle tax cost
  * @param {Object} ves data from DVSA MOT API
  * @param {Object} mot data from DVLA VES API
  * @returns {string} calculated tax cost
  */
 function createTaxCost(ves, mot) {
-	if (!mot?.registrationDate && !ves?.monthOfFirstRegistration) {
-		return { taxCost: 'Unknown' };
-	}
+	const registrationDate = parseRegistrationDate(mot, ves);
 
-	if (ves?.monthOfFirstDvlaRegistration) {
-		// imported vehicle = PLG Vehicle for tax rates
-		return { taxCost: '(TC39) £345' };
-	}
+	// no registrationDate, VED scheme incalculable
+	if (!registrationDate) return { taxCost: 'Unknown' };
 
-	let taxCost = '';
 	const co2Emissions = ves?.co2Emissions;
 	const engineCapacity = ves?.engineCapacity || mot?.engineSize;
 
-	const regAfter2017 = new Date('2017-04-01');
-	const emissionsMarch2006Cutoff = new Date('2006-03-23');
-	const regAfter2001 = new Date('2001-03-01');
-
-	const registrationDate = new Date(mot?.registrationDate || `${ves?.monthOfFirstRegistration}-01`,);
-	const currentDate = new Date();
-
-	if (compareDesc(regAfter2017, registrationDate) === 1) {
-		const luxTaxDateThreshold = add(registrationDate, { years: 5 });
-		if (
-			compareDesc(currentDate, luxTaxDateThreshold) === 1 ||
-			compareDesc(currentDate, luxTaxDateThreshold) === 0
-		) {
-			taxCost = '£195 / £620';
-		} else {
-			taxCost = '£195';
-		}
-	} else if (compareDesc(regAfter2001, registrationDate) === 1) {
-		if (!ves?.co2Emissions) return { taxCost: 'Unknown' };
-
-		for (const rate of vedRates) {
-			if (co2Emissions <= rate.co2) {
-				taxCost = rate.rate;
-				break;
-			}
-		}
-
-		if (
-			compareDesc(emissionsMarch2006Cutoff, registrationDate) === -1 &&
-			taxCost > 430
-		) {
-			taxCost = '(K) £430';
-		} else {
-			taxCost = `£${taxCost}`;
-		}
-	} else {
-		if (!mot?.engineSize && !ves?.engineCapacity) return { taxCost: 'Unknown' };
-
-		if (engineCapacity >= 1549) {
-			return { taxCost: '£360' };
-		} else {
-			return { taxCost: '£220' };
-		}
+	// Post-2017: flat rate
+	if (!isBefore(registrationDate, CUTOFF_2017)) {
+		const vedECSDateThreshold = add(registrationDate, { years: 5 });
+		const hasVedECS = isBefore(startOfDay(new Date()), vedECSDateThreshold);
+		return { taxCost: hasVedECS ? '£195 / £620' : '£195'}
 	}
 
-	return { taxCost: taxCost };
+	// Post-2001: co2 based
+	if (!isBefore(registrationDate, CUTOFF_2001) && co2Emissions) {
+		let rate = getVedRate(co2Emissions)
+		if (!rate) return { taxCost: 'Unknown' }
+
+		// Pre-2006: Band K cap
+		if (isBefore(registrationDate, CUTOFF_2006) && rate > 430) {
+			return { taxCost: '£430 (Band K cap)' }
+		}
+
+		return { taxCost: `£${rate}` }
+	}
+
+	// Pre-2001 or grey import: engine capacity based
+	if (!engineCapacity) return { taxCost: 'Unknown' }
+	return { taxCost: engineCapacity >= 1549 ? '£360' : '£220'}
 }
 
 module.exports = { createTaxCost }

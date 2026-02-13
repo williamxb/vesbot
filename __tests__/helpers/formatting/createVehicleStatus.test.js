@@ -1,4 +1,4 @@
-const { createVehicleStatus } = require('../../../helpers/formatting/createVehicleStatus');
+const { createVehicleStatus } = require('/helpers/formatting/createVehicleStatus');
 
 describe('createVehicleStatus', () => {
   describe('should handle empty input', () => {

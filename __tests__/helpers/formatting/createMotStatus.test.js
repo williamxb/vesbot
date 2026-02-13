@@ -1,4 +1,4 @@
-const { createMotStatus } = require('../../../helpers/formatting/createMotStatus');
+const { createMotStatus } = require('/helpers/formatting/createMotStatus');
 
 
 describe('createMotStatus', () => {

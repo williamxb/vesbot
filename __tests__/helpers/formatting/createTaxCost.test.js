@@ -1,4 +1,4 @@
-const { createTaxCost } = require('../../../helpers/formatting/createTaxCost');
+const { createTaxCost } = require('/helpers/formatting/createTaxCost');
 
 
 describe('createTaxCost', () => {
@@ -81,7 +81,7 @@ describe('createTaxCost', () => {
     expect(result).toStrictEqual({ taxCost: '£215' });
   });
 
-  test('should return Light Goods Vehicle (TC39) rate for imported vehicles', () => {
+  test('lower rate PLG', () => {
     const mot = {},
       ves = {
         taxStatus: 'SORN',
@@ -100,31 +100,56 @@ describe('createTaxCost', () => {
         monthOfFirstDvlaRegistration: '2025-10',
       };
     const result = createTaxCost(ves, mot);
-    expect(result).toStrictEqual({ taxCost: '(TC39) £345' });
+    expect(result).toStrictEqual({ taxCost: '£360' });
   });
 
-  test('should return unknown if 2001-2017 && co2Emissions not present', () => {
-    ves = {
-      taxStatus: 'Taxed',
-      taxDueDate: '2026-08-01',
-      motStatus: 'Valid',
-      make: 'FORD',
-      yearOfManufacture: 2012,
-      engineCapacity: 1997,
-      // co2Emissions: 149, test for missing co2Emissions
-      fuelType: 'DIESEL',
-      markedForExport: false,
-      colour: 'BLACK',
-      typeApproval: 'M1',
-      revenueWeight: 2505,
-      dateOfLastV5CIssued: '2020-03-13',
-      motExpiryDate: '2026-02-27',
-      wheelplan: '2 AXLE RIGID BODY',
-      monthOfFirstRegistration: '2012-04',
-    };
-    const result = createTaxCost(ves);
-    expect(result).toStrictEqual({ taxCost: 'Unknown' });
-  });
+  describe('imported vehicle', () => {
+    test('higher rate PLG', () => {
+      const mot = {},
+        ves = {
+          taxStatus: 'SORN',
+          motStatus: 'Valid',
+          make: 'BMW',
+          yearOfManufacture: 2009,
+          engineCapacity: 999,
+          co2Emissions: 0,
+          fuelType: 'PETROL',
+          markedForExport: false,
+          colour: 'WHITE',
+          dateOfLastV5CIssued: '2025-09-29',
+          motExpiryDate: '2026-09-09',
+          wheelplan: '2 AXLE RIGID BODY',
+          monthOfFirstRegistration: '2009-09',
+          monthOfFirstDvlaRegistration: '2025-10',
+        };
+      const result = createTaxCost(ves, mot);
+      expect(result).toStrictEqual({ taxCost: '£220' });
+    });
+  
+    test('should fall back to PLG if co2Emissions unknown', () => {
+      ves = {
+        taxStatus: 'Taxed',
+        taxDueDate: '2026-08-01',
+        motStatus: 'Valid',
+        make: 'FORD',
+        yearOfManufacture: 2012,
+        engineCapacity: 1997,
+        // co2Emissions: 149, test for missing co2Emissions
+        fuelType: 'DIESEL',
+        markedForExport: false,
+        colour: 'BLACK',
+        typeApproval: 'M1',
+        revenueWeight: 2505,
+        dateOfLastV5CIssued: '2020-03-13',
+        motExpiryDate: '2026-02-27',
+        wheelplan: '2 AXLE RIGID BODY',
+        monthOfFirstRegistration: '2012-04',
+      };
+      const result = createTaxCost(ves);
+      expect(result).toStrictEqual({ taxCost: '£360' });
+    });
+
+  })
 
   describe('vehicle is >2017', () => {
     test('should not show luxury tax as vehicle is older than 5 years', () => {
@@ -138,7 +163,6 @@ describe('createTaxCost', () => {
         manufactureDate: '2018-09-26',
         engineSize: '2143',
         hasOutstandingRecall: 'Unknown',
-        motTests: [[Object], [Object], [Object], [Object], [Object]],
       };
       const ves = {
         taxStatus: 'Taxed',
@@ -242,11 +266,11 @@ describe('createTaxCost', () => {
         ${200} | ${{ taxCost: '£395' }}
         ${201} | ${{ taxCost: '£430' }}
         ${225} | ${{ taxCost: '£430' }}
-        ${226} | ${{ taxCost: '(K) £430' }}
-        ${255} | ${{ taxCost: '(K) £430' }}
-        ${256} | ${{ taxCost: '(K) £430' }}
-        ${299} | ${{ taxCost: '(K) £430' }}
-        ${499} | ${{ taxCost: '(K) £430' }}
+        ${226} | ${{ taxCost: '£430 (Band K cap)' }}
+        ${255} | ${{ taxCost: '£430 (Band K cap)' }}
+        ${256} | ${{ taxCost: '£430 (Band K cap)' }}
+        ${299} | ${{ taxCost: '£430 (Band K cap)' }}
+        ${499} | ${{ taxCost: '£430 (Band K cap)' }}
       `('should return correct cost for each band', ({ co2, expected }) => {
         const ves = {
           engineCapacity: 4799,
@@ -369,7 +393,7 @@ describe('createTaxCost', () => {
           engineSize: '2143',
         };
         const result = createTaxCost(ves, mot);
-        expect(result).toStrictEqual({ taxCost: '(K) £430' });
+        expect(result).toStrictEqual({ taxCost: '£430 (Band K cap)' });
       });
 
       test('should handle 2001-02-28 correctly (large engine)', () => {

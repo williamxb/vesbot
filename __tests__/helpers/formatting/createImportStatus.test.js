@@ -1,4 +1,4 @@
-const { createImportStatus } = require('../../../helpers/formatting/createImportStatus');
+const { createImportStatus } = require('/helpers/formatting/createImportStatus');
 
 describe('createImportStatus', () => {
 	test('should detect an imported vehicle', () => {
