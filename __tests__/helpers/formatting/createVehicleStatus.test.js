@@ -53,17 +53,27 @@ describe('createVehicleStatus', () => {
     expect(result.embedColour).toBe(0xb11212);
   });
 
-  test('should return write off status', () => {
-    const vehicle = {
-      scrapped: false,
-      stolen: false,
-      writeOffCategory: 'S',
-    };
-    const registration = 'AB12CDE';
-    const result = createVehicleStatus(vehicle, registration);
-    expect(result.vehicleStatus).toBe('**Write-off - CAT S**');
-    expect(result.embedColour).toBe(0xb11212);
-  });
+  test.each([
+    ['A', '**Write-off - CAT A**', 0xb11212],
+    ['B', '**Write-off - CAT B**', 0xb11212],
+    ['C', '**Write-off - CAT C**', 0xb11212],
+    ['D', '**Write-off - CAT D**', 0xb11212],
+    ['S', '**Write-off - CAT S**', 0xb11212],
+    ['N', '**Write-off - CAT N**', 0xb11212],
+  ])(
+    'should return write off status for CAT %s',
+    (category, expectedVehicleStatus, expectedEmbedColour) => {
+      const vehicle = {
+        scrapped: false,
+        stolen: false,
+        writeOffCategory: category,
+      };
+      const registration = 'AB12CDE';
+      const result = createVehicleStatus(vehicle, registration);
+      expect(result.vehicleStatus).toBe(expectedVehicleStatus);
+      expect(result.embedColour).toBe(expectedEmbedColour);
+    }
+  )
 
   test('should handle Q plated vehicles', () => {
     const vehicle = {

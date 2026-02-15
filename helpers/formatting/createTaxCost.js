@@ -40,7 +40,7 @@ function parseRegistrationDate(mot, ves) {
 	if (!dateString) return null;
 	
 	// protect against malforced data - invalid dates detected with isNan
-	const parsedDate = startOfDay(new Date(dateString));
+	const parsedDate = new Date(dateString);
 	return isNaN(parsedDate.getTime()) ? null : parsedDate;
 }
 

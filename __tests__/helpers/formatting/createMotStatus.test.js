@@ -1,6 +1,5 @@
 const { createMotStatus } = require('/helpers/formatting/createMotStatus');
 
-
 describe('createMotStatus', () => {
   beforeEach(() => {
     // Mock system time
