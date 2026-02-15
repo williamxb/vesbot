@@ -1,4 +1,4 @@
-const { compareAsc } = require('date-fns');
+const { isBefore, startOfDay } = require('date-fns');
 
 /**
  * Convert string to TitleCase
@@ -6,6 +6,23 @@ const { compareAsc } = require('date-fns');
  * @returns TitleCase string
  */
 function toTitleCase(str) { return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); }
+
+/**
+ * Create registration date
+ * @param {Object} ves data from DVSA MOT API
+ * @param {Object} mot data from DVLA VES API
+ * @returns {Date} registration date
+ */
+function parseRegistrationDate(mot, ves) {
+	const dateString = mot?.registrationDate ?? (ves?.monthOfFirstRegistration && `${ves.monthOfFirstRegistration}-01`);
+	
+	// no data, nothing to return
+	if (!dateString) return null;
+	
+	// protect against malforced data - invalid dates detected with isNan
+	const parsedDate = new Date(dateString);
+	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+}
 
 /**
  * Estimate LEZ compliance
@@ -22,20 +39,17 @@ function createLEZCompliance(data) {
 
   // electric/hybrid assumed to be compliant
   if (fuelType === "Electricity"  || fuelType === "Hybrid Electric") {
-    return { lezTitle: "LEZ ✅", lezStatus: 'Compliant' }
+    return { lezTitle: "LEZ ✅", lezStatus: `${fuelType}\nCompliant` }
   }
 
-  /**
-   * Use EURO API to calculate LEZ compliance
-   */
-
+  // Use EURO API to calculate LEZ compliance
   if (data?.euro?.euroStatus !== "None" && data?.euro?.euroStatus) {
     const euroStatus = toTitleCase(data.euro.euroStatus);
 
     // petrol - Euro 4 to 6 are compliant
     if (fuelType === "Petrol") {
-      const re = /[4-6]+/g;
-      if (re.test(euroStatus)) {
+      const regex = /[4-6]+/g;
+      if (regex.test(euroStatus)) {
         return { lezTitle: "LEZ ✅", lezStatus: `${euroStatus} ${fuelType}\nCompliant` }
       } else {
         return { lezTitle: "LEZ ❌", lezStatus: `${euroStatus} ${fuelType}\nNon-compliant` }
@@ -44,8 +58,8 @@ function createLEZCompliance(data) {
 
     // diesel - Euro 6 are compliant
     if (fuelType === "Diesel") {
-      const re = /[6]+/g;
-      if (re.test(euroStatus)) {
+      const regex = /[6]+/g;
+      if (regex.test(euroStatus)) {
         return { lezTitle: "LEZ ✅", lezStatus: `${euroStatus} ${fuelType}\nCompliant` }
       } else {
         return { lezTitle: "LEZ ❌", lezStatus: `${euroStatus} ${fuelType}\nNon-compliant` }
@@ -53,53 +67,43 @@ function createLEZCompliance(data) {
     } 
   }
 
-  /**
-   * EURO API unavailable, but we can still estimate using manufacture date!
-   */
+  // EURO API unavailable, but we can still estimate using manufacture date
+  const registrationDate = parseRegistrationDate(data?.mot, data?.ves);
 
-  // manufacture date unknown, unable to calculate LEZ compliance
-  if (!data?.ves?.manufactureDate && !data?.mot?.manufactureDate) return { lezTitle: "LEZ ❓", lezStatus: "Unknown" }
+	// no registrationDate, LEZ compliance incalculable
+	if (!registrationDate) return { lezTitle: "LEZ ❓", lezStatus: "Unknown" }
 
-  // vehicle date setup
-  const vehicleDateRaw = data?.ves?.manufactureDate || data?.mot?.manufactureDate;
-  const vehicleDate = new Date(vehicleDateRaw);
-
-  // compliance dates setup
-  // vehicle manufactured between introduction and enforcement MAY be compliant!
-  const euro4Introduced = new Date('2005-01-01');
-  const euro4Mandatory = new Date('2006-01-01');
-  const euro6Introduced = new Date('2015-09-01');
-  const euro6Mandatory = new Date('2016-09-01');
-
+  // vehicle manufactured between introduction and enforcement MAY still be compliant
+  const CUTOFF_Euro4Introduced = startOfDay(new Date('2005-01-01'));
+  const CUTOFF_Euro4Mandatory = startOfDay(new Date('2006-01-01'));
+  const CUTOFF_Euro6Introduced = startOfDay(new Date('2015-09-01'));
+  const CUTOFF_Euro6Mandatory = startOfDay(new Date('2016-09-01'));
+ 
   switch (fuelType) {
     case "Petrol":
-      if (compareAsc(vehicleDate, euro4Mandatory) >= 0) {
+      if (!isBefore(registrationDate, CUTOFF_Euro4Mandatory)) {
         // Vehicle manufactured on the day of or after Euro 4 was made mandatory
-        console.log("euro 4 mandatory")
-        return { lezTitle: "LEZ ✅", lezStatus: `Post-Euro 4 ${fuelType}` }
+        return { lezTitle: "LEZ ✅", lezStatus: `Post-Euro 4 ${fuelType}\nCompliant` }
       }
 
-      if (compareAsc(vehicleDate, euro4Introduced) >= 0) {
+      if (!isBefore(registrationDate, CUTOFF_Euro4Introduced)) {
         // Vehicle manufactured on the day of or after Euro 4 was introduced
-        console.log("euro 4 introduced")
-        return { lezTitle: "LEZ ✅⚠️", lezStatus: `${fuelType}\nMay Meet Euro 4` }
+        return { lezTitle: "LEZ ✅⚠️", lezStatus: `Euro 3/4 ${fuelType}\nPotentially compliant` }
       }
 
       else {
-        return { lezTitle: "LEZ ❌", lezStatus: `Pre-Euro 4 ${fuelType}` }
+        return { lezTitle: "LEZ ❌", lezStatus: `Pre-Euro 4 ${fuelType}\nNon-compliant` }
       }
 
     case "Diesel":
-      if (compareAsc(vehicleDate, euro6Mandatory) >= 0) {
+      if (!isBefore(registrationDate, CUTOFF_Euro6Mandatory)) {
         // Vehicle manufactured on the day of or after Euro 6 was made mandatory
-        console.log("euro 6 mandatory")
-        return { lezTitle: "LEZ ✅", lezStatus: `Post-Euro 6 ${fuelType}` }
+        return { lezTitle: "LEZ ✅", lezStatus: `Post-Euro 6 ${fuelType}\nCompliant` }
       }
 
-      if (compareAsc(vehicleDate, euro6Introduced) >= 0) {
+      if (!isBefore(registrationDate, CUTOFF_Euro6Introduced)) {
         // Vehicle manufactured on the day of or after Euro 6 was introduced
-        console.log("euro 6 introduced")
-        return { lezTitle: "LEZ ✅⚠️", lezStatus: `${fuelType}\nMay Meet Euro 6` }
+        return { lezTitle: "LEZ ✅⚠️", lezStatus: `Euro 5/6 ${fuelType}\nPotentially compliant` }
       }
 
       else {
