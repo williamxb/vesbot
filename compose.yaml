@@ -1,8 +1,0 @@
-services:
-  vesbot:
-    container_name: vesbot
-    build:
-      context: .
-    environment:
-      NODE_ENV: production
-    env_file: .env

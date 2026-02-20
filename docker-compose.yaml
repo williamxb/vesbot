@@ -1,0 +1,32 @@
+services:
+  vesbot:
+    container_name: vesbot
+    depends_on:
+      - db
+    build:
+      context: .
+    environment:
+      NODE_ENV: production
+      PGHOST: 5432
+      PGDATABASE: vesbot
+      PGUSER: vesbot
+      PGPASSWORD: vesbot
+    env_file: .env
+
+  db:
+    container_name: db
+    image: postgis/postgis:latest # @TODO: pick a version
+    environment:
+      POSTGRES_DB: vesbot
+      POSTGRES_USER: vesbot
+      POSTGRES_PASSWORD: vesbot
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - .sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vesbot"]
+      interval: 10s
+      retries: 5
+
+volumes:
+  pgdata:
