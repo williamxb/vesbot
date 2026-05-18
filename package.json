@@ -17,7 +17,7 @@
   "dependencies": {
     "@azure/msal-node": "^5.1",
     "bufferutil": "^4",
-    "date-fns": "^4.1",
+    "date-fns": "^4.2",
     "discord.js": "^14",
     "dotenv": "^17",
     "zlib-sync": "^0.1"
