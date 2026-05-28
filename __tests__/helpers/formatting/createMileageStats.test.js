@@ -2,24 +2,30 @@ import { createMileageStats } from '#helpers/formatting/createMileageStats.js';
 
 describe('createMileageStats', () => {
     test('returns empty if no tests', () => {
-        expect(createMileageStats([])).toStrictEqual({ mileageSummary: '' });
-        expect(createMileageStats(null)).toStrictEqual({ mileageSummary: '' });
+        expect(createMileageStats([])).toStrictEqual({ mileageSummary: '', currentMileage: 'Unknown', mileageGraphUrl: null });
+        expect(createMileageStats(null)).toStrictEqual({ mileageSummary: '', currentMileage: 'Unknown', mileageGraphUrl: null });
     });
 
     test('returns empty if no valid odometer readings', () => {
         const tests = [{ completedDate: '2022-01-01', odometerValue: null }];
-        expect(createMileageStats(tests)).toStrictEqual({ mileageSummary: '' });
+        expect(createMileageStats(tests)).toStrictEqual({ mileageSummary: '', currentMileage: 'Unknown', mileageGraphUrl: null });
     });
 
-    test('calculates current and average correctly for standard miles', () => {
+    test('calculates current, average, most and least correctly for standard miles', () => {
         const tests = [
-            { completedDate: '2024-01-01T10:00:00Z', odometerValue: '120000', odometerUnit: 'MI' },
-            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' }, // 2 years, 20k diff -> 10k/yr
-            { completedDate: '2023-01-01T10:00:00Z', odometerValue: '110000', odometerUnit: 'MI' }
+            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' },
+            { completedDate: '2023-01-01T10:00:00Z', odometerValue: '110000', odometerUnit: 'MI' }, // gap: 10k
+            { completedDate: '2024-01-01T10:00:00Z', odometerValue: '112000', odometerUnit: 'MI' }, // gap: 2k
+            { completedDate: '2025-01-01T10:00:00Z', odometerValue: '127000', odometerUnit: 'MI' }  // gap: 15k
         ];
         
         const result = createMileageStats(tests);
-        expect(result.mileageSummary).toBe(`🏎️ Current: 120,000 mi\n📊 Average: ~10,000 mi/yr`);
+        expect(result.currentMileage).toBe('127,000 mi');
+        expect(result.mileageSummary).toContain(`🏎️ Current: 127,000 mi`);
+        expect(result.mileageSummary).toContain(`📊 Average: ~9,000 mi/yr`);
+        expect(result.mileageSummary).toContain(`📈 Most in a yr: ~15,000 mi (2025)`);
+        expect(result.mileageSummary).toContain(`📉 Least in a yr: ~2,000 mi (2024)`);
+        expect(result.mileageGraphUrl).toContain('quickchart.io');
     });
 
     test('detects blatant tampering anomaly', () => {
