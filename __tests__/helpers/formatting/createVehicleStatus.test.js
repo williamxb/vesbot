@@ -1,4 +1,4 @@
-const { createVehicleStatus } = require('/helpers/formatting/createVehicleStatus');
+import { createVehicleStatus  } from '#helpers/formatting/createVehicleStatus.js';
 
 describe('createVehicleStatus', () => {
   describe('should handle empty input', () => {

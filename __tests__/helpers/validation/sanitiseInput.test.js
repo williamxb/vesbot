@@ -1,4 +1,4 @@
-const { sanitiseInput } = require('/helpers/validation/sanitiseInput');
+import { sanitiseInput  } from '#helpers/validation/sanitiseInput.js';
 
 describe('test input sanitization', () => {
     test('remove special characters', () => {

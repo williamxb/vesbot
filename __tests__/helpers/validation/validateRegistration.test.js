@@ -1,4 +1,4 @@
-const { validateRegistration } = require('/helpers/validation/validateRegistration');
+import { validateRegistration  } from '#helpers/validation/validateRegistration.js';
 
 describe('validateRegistration', () => {
   describe('test valid registrations', () => {

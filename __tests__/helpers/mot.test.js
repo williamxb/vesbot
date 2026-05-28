@@ -1,9 +1,9 @@
-const { processMotDefects } = require('../../helpers/mot');
+import { processMotDefects  } from '#helpers/mot.js';
 
 describe('processMotDefects', () => {
 	test('should handle undefined and null inputs', () => {
 		const motTests = [];
-		result = processMotDefects(motTests);
+		const result = processMotDefects(motTests);
 		expect(result).toStrictEqual({ motDefectsSummary: '❔ No MOT history' });
 	});
 

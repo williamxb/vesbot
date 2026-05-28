@@ -20,4 +20,4 @@ function calculateColour(colour) {
 	return colourMap[colour] || colour;
 }
 
-module.exports = { calculateColour }
+export { calculateColour };

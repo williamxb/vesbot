@@ -1,4 +1,4 @@
-const { isBefore, startOfDay } = require('date-fns');
+import { isBefore, startOfDay  } from 'date-fns';
 
 /**
  * Convert string to TitleCase
@@ -112,4 +112,4 @@ function createLEZCompliance(data) {
   }
 }
 
-module.exports = { createLEZCompliance }
+export { createLEZCompliance };

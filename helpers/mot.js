@@ -96,4 +96,4 @@ function processMotDefects(motTests) {
 	return { motDefectsSummary: motDefectsSummary };
 }
 
-module.exports = { processMotDefects };
+export { processMotDefects };

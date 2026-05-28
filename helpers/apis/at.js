@@ -27,4 +27,4 @@ async function fetchAT(registration) {
 	return await data.data.vehicle.vrmLookup;
 }
 
-module.exports = { fetchAT }
+export { fetchAT };

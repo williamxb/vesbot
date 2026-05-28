@@ -1,4 +1,4 @@
-const { createVehicleYear } = require('/helpers/formatting/createVehicleYear');
+import { createVehicleYear  } from '#helpers/formatting/createVehicleYear.js';
 
 describe('createVehicleStatus', () => {
   describe('should handle empty input', () => {

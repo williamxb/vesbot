@@ -1,10 +1,11 @@
-const msal = require('@azure/msal-node');
+import * as msal from '@azure/msal-node';
+import appConfig from '#helpers/config.js';
 
 const config = {
 	auth: {
-		clientId: process.env.MOT_CLIENT_ID,
-		authority: process.env.MOT_CLIENT_AUTHORITY,
-		clientSecret: process.env.MOT_CLIENT_SECRET,
+		clientId: appConfig.apis.mot.clientId,
+		authority: appConfig.apis.mot.authority,
+		clientSecret: appConfig.apis.mot.clientSecret,
 	},
 };
 
@@ -15,11 +16,11 @@ const cca = new msal.ConfidentialClientApplication(config);
  * @returns OAuth 2.0 Bearer Token
  */
 async function getAccessToken() {
-	const tokenRequest = { scopes: [process.env.MOT_CLIENT_SCOPE_URL] };
+	const tokenRequest = { scopes: [appConfig.apis.mot.scope] };
 	const response = await cca.acquireTokenByClientCredential(tokenRequest);
 	return response.accessToken;
 }
 
-module.exports = {
+export {
 	getAccessToken,
 };

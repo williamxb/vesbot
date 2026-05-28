@@ -1,4 +1,4 @@
-const { createLEZCompliance } = require('/helpers/formatting/createLEZCompliance');
+import { createLEZCompliance  } from '#helpers/formatting/createLEZCompliance.js';
 
 describe('missing or malformed data', () => {
   test('should handle no data', () => {

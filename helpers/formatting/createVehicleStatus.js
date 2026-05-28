@@ -33,4 +33,4 @@ function createVehicleStatus(vehicle, registration) {
 	return { vehicleStatus: status, embedColour: 0xb11212 };
 }
 
-module.exports = { createVehicleStatus }
+export { createVehicleStatus };

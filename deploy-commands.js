@@ -1,15 +1,20 @@
-require('dotenv').config();
-const { REST, Routes } = require('discord.js');
-const fs = require('node:fs');
-const path = require('node:path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { REST, Routes } from 'discord.js';
+import config from '#helpers/config.js';
+import logger from '#helpers/logger.js';
 
-const clientId = process.env.DISCORD_APP_ID;
-const token = process.env.DISCORD_APP_TOKEN;
+const clientId = config.discord.clientId;
+const token = config.discord.token;
 
 const commands = [];
 // Grab all command folders
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const foldersPath = path.join(import.meta.dirname, 'commands');
+const commandFolders = fs
+	.readdirSync(foldersPath, { withFileTypes: true })
+	.filter((dirent) => dirent.isDirectory())
+	.map((dirent) => dirent.name);
 
 // Loop through each folder
 for (const folder of commandFolders) {
@@ -19,11 +24,14 @@ for (const folder of commandFolders) {
 	// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
+		const fileUrl = pathToFileURL(filePath).href;
+		const commandModule = await import(fileUrl);
+		const command = commandModule.default || commandModule;
+
 		if ('data' in command && 'execute' in command) {
 			commands.push(command.data.toJSON());
 		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+			logger.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`, { file: filePath });
 		}
 	}
 }
@@ -34,14 +42,14 @@ const rest = new REST().setToken(token);
 // Deploy commands
 (async () => {
 	try {
-		console.log(`Refreshing ${commands.length} commands...`);
+		logger.info(`Refreshing ${commands.length} commands...`, { count: commands.length });
 
 		const data = await rest.put(Routes.applicationCommands(clientId), {
 			body: commands,
 		});
 
-		console.log(`Successfully reloaded ${data.length} commands.`);
+		logger.info(`Successfully reloaded ${data.length} commands.`, { count: data.length });
 	} catch (error) {
-		console.error(error);
+		logger.error(error.message || 'Error deploying commands', { error: error.stack });
 	}
 })();
