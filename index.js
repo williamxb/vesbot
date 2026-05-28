@@ -44,17 +44,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		logger.error(`No command matching ${interaction.commandName}`, { command: interaction.commandName, user: interaction.user.id });
+		logger.error(`No command matching ${interaction.commandName}`, {
+			command: interaction.commandName,
+			user: interaction.user.id,
+		});
 		return;
 	}
 
 	try {
 		await command.execute(interaction);
 	} catch (error) {
-		logger.error(error.message || 'Error executing command', { 
-			error: error.stack, 
-			command: interaction.commandName, 
-			user: interaction.user.id 
+		logger.error(error.message || 'Error executing command', {
+			error: error.stack,
+			command: interaction.commandName,
+			user: interaction.user.id,
 		});
 		if (interaction.replied || interaction.deferred) {
 			// await interaction.followUp({ content: "There was an error while executing this command!" });

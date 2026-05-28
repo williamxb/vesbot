@@ -1,16 +1,25 @@
-import { ApplicationIntegrationType, EmbedBuilder, InteractionContextType, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
-import logger from '#helpers/logger.js';
+import {
+	ActionRowBuilder,
+	ApplicationIntegrationType,
+	ButtonBuilder,
+	ButtonStyle,
+	ComponentType,
+	EmbedBuilder,
+	InteractionContextType,
+	SlashCommandBuilder,
+} from 'discord.js';
 import { fetchVehicleData } from '#helpers/apis/fetchVehicleData.js';
 import { calculateColour } from '#helpers/formatting/calculateColour.js';
 import { createImportStatus } from '#helpers/formatting/createImportStatus.js';
 import { createLastV5 } from '#helpers/formatting/createLastV5.js';
 import { createLEZCompliance } from '#helpers/formatting/createLEZCompliance.js';
+import { createMileageStats } from '#helpers/formatting/createMileageStats.js';
 import { createMotStatus } from '#helpers/formatting/createMotStatus.js';
 import { createTaxCost } from '#helpers/formatting/createTaxCost.js';
 import { createTaxStatus } from '#helpers/formatting/createTaxStatus.js';
 import { createVehicleStatus } from '#helpers/formatting/createVehicleStatus.js';
 import { createVehicleYear } from '#helpers/formatting/createVehicleYear.js';
-import { createMileageStats } from '#helpers/formatting/createMileageStats.js';
+import logger from '#helpers/logger.js';
 import { processMotDefects } from '#helpers/mot.js';
 import { sanitiseInput } from '#helpers/validation/sanitiseInput.js';
 import { validateRegistration } from '#helpers/validation/validateRegistration.js';
@@ -39,7 +48,12 @@ export default {
 				.addFields({ name: 'Registration', value: registration, inline: true })
 				.setColor(0xff0000);
 			const message = await interaction.editReply({ embeds: [embed] });
-			logger.warn(`Registration failed validation`, { registration, user: interaction.user.id, guildId: interaction.guildId, messageUrl: message.url });
+			logger.warn(`Registration failed validation`, {
+				registration,
+				user: interaction.user.id,
+				guildId: interaction.guildId,
+				messageUrl: message.url,
+			});
 			return message;
 		}
 
@@ -49,7 +63,12 @@ export default {
 			data = response.data;
 			failed = response.failed;
 		} catch (error) {
-			logger.error('Error fetching vehicle data', { error: error.stack, registration, user: interaction.user.id, guildId: interaction.guildId });
+			logger.error('Error fetching vehicle data', {
+				error: error.stack,
+				registration,
+				user: interaction.user.id,
+				guildId: interaction.guildId,
+			});
 			const embed = new EmbedBuilder()
 				.setTitle(`An error occurred fetching vehicle data.`)
 				.setDescription(error.message || `Registration \`${registration}\` could not be processed.`)
@@ -64,7 +83,12 @@ export default {
 				.addFields({ name: 'Is the registration correct?', value: registration, inline: true })
 				.setColor(0xffaa00);
 			const message = await interaction.editReply({ embeds: [embed] });
-			logger.info(`Vehicle not found`, { registration, user: interaction.user.id, guildId: interaction.guildId, messageUrl: message.url });
+			logger.info(`Vehicle not found`, {
+				registration,
+				user: interaction.user.id,
+				guildId: interaction.guildId,
+				messageUrl: message.url,
+			});
 			return message;
 		}
 
@@ -107,7 +131,10 @@ export default {
 			processMotDefects(data?.mot?.motTests),
 			createMileageStats(
 				data?.mot?.motTests,
-				data?.ves?.yearOfManufacture || data?.mot?.manufactureYear || data?.mot?.manufactureDate || data?.vin?.plate_lookup?.year
+				data?.ves?.yearOfManufacture ||
+					data?.mot?.manufactureYear ||
+					data?.mot?.manufactureDate ||
+					data?.vin?.plate_lookup?.year,
 			),
 		);
 
@@ -141,8 +168,10 @@ export default {
 				if (embedData.mileageSummary) {
 					embed.addFields([{ name: 'Mileage Analytics', value: embedData.mileageSummary, inline: false }]);
 				}
-				embed.addFields([{ name: 'Last 5 years MOT Defects', value: embedData.motDefectsSummary || 'No MOT defects', inline: false }]);
-				
+				embed.addFields([
+					{ name: 'Last 5 years MOT Defects', value: embedData.motDefectsSummary || 'No MOT defects', inline: false },
+				]);
+
 				if (embedData.mileageGraphUrl) {
 					embed.setImage(embedData.mileageGraphUrl);
 				}
@@ -163,17 +192,22 @@ export default {
 				new ButtonBuilder()
 					.setCustomId('history')
 					.setLabel('🛠️ MOT & Mileage')
-					.setStyle(currentPage === 'history' ? ButtonStyle.Primary : ButtonStyle.Secondary)
+					.setStyle(currentPage === 'history' ? ButtonStyle.Primary : ButtonStyle.Secondary),
 			);
 		};
 
 		let currentPage = 'overview';
-		const message = await interaction.editReply({ 
-			embeds: [generateEmbed(currentPage)], 
-			components: [getRow(currentPage)] 
+		const message = await interaction.editReply({
+			embeds: [generateEmbed(currentPage)],
+			components: [getRow(currentPage)],
 		});
-		
-		logger.info(`Successfully processed registration`, { registration, user: interaction.user.id, guildId: interaction.guildId, messageUrl: message.url });
+
+		logger.info(`Successfully processed registration`, {
+			registration,
+			user: interaction.user.id,
+			guildId: interaction.guildId,
+			messageUrl: message.url,
+		});
 
 		// Interactive Component Collector (5-minute timeout)
 		const collector = message.createMessageComponentCollector({ componentType: ComponentType.Button, time: 300000 });
@@ -187,16 +221,28 @@ export default {
 			currentPage = i.customId;
 			await i.update({
 				embeds: [generateEmbed(currentPage)],
-				components: [getRow(currentPage)]
+				components: [getRow(currentPage)],
 			});
 		});
 
 		collector.on('end', () => {
 			// Disable buttons after timeout
 			const disabledRow = new ActionRowBuilder().addComponents(
-				new ButtonBuilder().setCustomId('overview').setLabel('📋 Overview').setStyle(ButtonStyle.Secondary).setDisabled(true),
-				new ButtonBuilder().setCustomId('technical').setLabel('🔧 Technical').setStyle(ButtonStyle.Secondary).setDisabled(true),
-				new ButtonBuilder().setCustomId('history').setLabel('🛠️ MOT & Mileage').setStyle(ButtonStyle.Secondary).setDisabled(true)
+				new ButtonBuilder()
+					.setCustomId('overview')
+					.setLabel('📋 Overview')
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(true),
+				new ButtonBuilder()
+					.setCustomId('technical')
+					.setLabel('🔧 Technical')
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(true),
+				new ButtonBuilder()
+					.setCustomId('history')
+					.setLabel('🛠️ MOT & Mileage')
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(true),
 			);
 			const expiredEmbed = generateEmbed(currentPage);
 			expiredEmbed.setFooter({ text: `${registration}${failed} | Buttons expired, resend command to interact` });
