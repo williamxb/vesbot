@@ -72,28 +72,31 @@ describe('createMileageStats', () => {
     });
 
     describe('mileage extrapolation for first 3 years of life', () => {
-        test('extrapolates to year of manufacture at 0 mileage when prior to first MOT', () => {
+        test('extrapolates to year of manufacture at 0 mileage when prior to first MOT with dual-dataset structure', () => {
             const tests = [
                 { completedDate: '2021-01-01T10:00:00Z', odometerValue: '25000', odometerUnit: 'MI' },
                 { completedDate: '2022-01-01T10:00:00Z', odometerValue: '35000', odometerUnit: 'MI' }
             ];
             const result = createMileageStats(tests, 2018);
-            expect(result.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2021', '2022'])));
-            expect(result.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 25000, 35000])));
+            expect(result.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2019', '2020', '2021', '2022'])));
+            expect(result.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 8333, 16667, 25000, null])));
+            expect(result.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([null, null, null, 25000, 35000])));
         });
 
-        test('handles full date string or string year representation', () => {
+        test('handles full date string or string year representation with correct dual-dataset parsing', () => {
             const tests = [
                 { completedDate: '2021-01-01T10:00:00Z', odometerValue: '25000', odometerUnit: 'MI' }
             ];
             
             const resultDateStr = createMileageStats(tests, '2018-05-12');
-            expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2021'])));
-            expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 25000])));
+            expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2019', '2020', '2021'])));
+            expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 8333, 16667, 25000])));
+            expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([null, null, null, 25000])));
 
             const resultYearStr = createMileageStats(tests, '2018');
-            expect(resultYearStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2021'])));
-            expect(resultYearStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 25000])));
+            expect(resultYearStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2019', '2020', '2021'])));
+            expect(resultYearStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 8333, 16667, 25000])));
+            expect(resultYearStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([null, null, null, 25000])));
         });
 
         test('does not extrapolate if manufacture year is equal to or after first MOT', () => {

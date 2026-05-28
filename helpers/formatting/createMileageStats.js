@@ -110,28 +110,54 @@ export function createMileageStats(motTests, manufactureYearRaw) {
 
     // Generate QuickChart URL
     // Map dates and values, deduplicating years if there are multiple tests in one year
-    const chartLabels = [];
-    const chartData = [];
-    let lastYear = null;
-    
-    if (manufactureYear && validTests.length > 0) {
-        const oldestTestYear = validTests[0].date.getFullYear();
-        if (manufactureYear < oldestTestYear) {
-            chartLabels.push(manufactureYear.toString());
-            chartData.push(0);
-            lastYear = manufactureYear.toString();
-        }
-    }
-    
+    const baseLabels = [];
+    const baseActualData = [];
+    let prevYear = null;
     for (const test of validTests) {
         const year = test.date.getFullYear().toString();
-        // If multiple tests in one year, overwrite the previous dot to show the latest for that year
-        if (year === lastYear) {
-            chartData[chartData.length - 1] = test.normalizedMiles;
+        if (year === prevYear) {
+            baseActualData[baseActualData.length - 1] = test.normalizedMiles;
         } else {
-            chartLabels.push(year);
-            chartData.push(test.normalizedMiles);
-            lastYear = year;
+            baseLabels.push(year);
+            baseActualData.push(test.normalizedMiles);
+            prevYear = year;
+        }
+    }
+
+    const chartLabels = [];
+    const estimatedData = [];
+    const actualData = [];
+    const oldestTestYear = baseLabels.length > 0 ? parseInt(baseLabels[0], 10) : null;
+
+    if (manufactureYear && oldestTestYear && manufactureYear < oldestTestYear) {
+        const yearDiff = oldestTestYear - manufactureYear;
+        const oldestTestMileage = baseActualData[0];
+        
+        // Populate the estimation years (manufactureYear to oldestTestYear - 1)
+        for (let y = manufactureYear; y < oldestTestYear; y++) {
+            chartLabels.push(y.toString());
+            const imputedVal = Math.round((oldestTestMileage * (y - manufactureYear)) / yearDiff);
+            estimatedData.push(Math.max(0, imputedVal));
+            actualData.push(null);
+        }
+        
+        // Connect point at oldestTestYear
+        chartLabels.push(oldestTestYear.toString());
+        estimatedData.push(oldestTestMileage);
+        actualData.push(oldestTestMileage);
+        
+        // Populate subsequent years
+        for (let i = 1; i < baseLabels.length; i++) {
+            chartLabels.push(baseLabels[i]);
+            estimatedData.push(null);
+            actualData.push(baseActualData[i]);
+        }
+    } else {
+        // No estimation needed, just populate actualData normally, estimatedData all null
+        for (let i = 0; i < baseLabels.length; i++) {
+            chartLabels.push(baseLabels[i]);
+            estimatedData.push(null);
+            actualData.push(baseActualData[i]);
         }
     }
 
@@ -139,16 +165,28 @@ export function createMileageStats(motTests, manufactureYearRaw) {
         type: 'line',
         data: {
             labels: chartLabels,
-            datasets: [{
-                label: 'Mileage',
-                data: chartData,
-                borderColor: 'rgb(88, 101, 242)', // Discord Blurple
-                backgroundColor: 'rgba(88, 101, 242, 0.2)',
-                fill: true,
-                borderWidth: 3,
-                pointBackgroundColor: 'rgb(255, 255, 255)',
-                pointRadius: 4
-            }]
+            datasets: [
+                {
+                    label: 'Estimated',
+                    data: estimatedData,
+                    borderColor: 'rgba(88, 101, 242, 0.4)', // Translucent Discord Blurple
+                    borderDash: [5, 5],
+                    fill: false,
+                    borderWidth: 3,
+                    pointRadius: 0, // No dots for estimated years
+                    pointHitRadius: 0
+                },
+                {
+                    label: 'Actual',
+                    data: actualData,
+                    borderColor: 'rgb(88, 101, 242)', // Discord Blurple
+                    backgroundColor: 'rgb(36, 36, 41)',
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgb(255, 255, 255)',
+                    pointRadius: 4
+                }
+            ]
         },
         options: {
             legend: { display: false },
@@ -160,7 +198,7 @@ export function createMileageStats(motTests, manufactureYearRaw) {
         }
     };
 
-    const mileageGraphUrl = `https://quickchart.io/chart?bkg=rgb(43,45,49)&w=600&h=300&c=${encodeURIComponent(JSON.stringify(chartConfig))}`;
+    const mileageGraphUrl = `https://quickchart.io/chart?bkg=rgb(36,36,41)&w=600&h=300&c=${encodeURIComponent(JSON.stringify(chartConfig))}`;
 
     return { 
         mileageSummary: summary.trim(),
