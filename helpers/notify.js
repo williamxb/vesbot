@@ -30,22 +30,20 @@ function notify(severity, message) {
 		.setTimestamp(new Date())
 		.setFields({
 			name: severity,
-			value: message,
+			value: message || 'No message provided',
 			inline: false,
 		});
 
-	try {
-		fetch(notificationUrl, {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({
-				content: null,
-				embeds: [embed],
-			}),
-		});
-	} catch (error) {
+	fetch(notificationUrl, {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({
+			content: null,
+			embeds: [embed],
+		}),
+	}).catch((error) => {
 		console.error('Error sending notification:', error);
-	}
+	});
 }
 
 module.exports = { notify };
