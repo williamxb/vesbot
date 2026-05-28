@@ -7,6 +7,23 @@ import { fetchVIN  } from '#helpers/apis/vin.js';
 import config from '#helpers/config.js';
 import logger from '#helpers/logger.js';
 
+async function timedFetch(apiName, fetchPromise, registration) {
+	const start = Date.now();
+	try {
+		const result = await fetchPromise;
+		const durationMs = Date.now() - start;
+		logger.info(`Successfully fetched data from ${apiName}`, { api: apiName, registration, durationMs });
+		return result;
+	} catch (error) {
+		const durationMs = Date.now() - start;
+		if (error.message === '429') {
+			logger.warn(`Rate Limit Hit on ${apiName}`, { api: apiName, registration, durationMs });
+		} else {
+			logger.warn(`API Error on ${apiName}`, { api: apiName, registration, durationMs, error: error.message });
+		}
+		throw error;
+	}
+}
 
 /**
  * Send requests to enabled APIs and return results
@@ -16,13 +33,13 @@ import logger from '#helpers/logger.js';
 async function fetchVehicleData(registration) {
 	const tasks = [];
 
-	if (config.apis.ves.enabled) tasks.push({ name: 'ves', promise: fetchVES(registration) });
-	if (config.apis.mot.enabled) tasks.push({ name: 'mot', promise: fetchMOT(registration) });
-	if (config.apis.vin.enabled) tasks.push({ name: 'vin', promise: fetchVIN(registration) });
+	if (config.apis.ves.enabled) tasks.push({ name: 'ves', promise: timedFetch('ves', fetchVES(registration), registration) });
+	if (config.apis.mot.enabled) tasks.push({ name: 'mot', promise: timedFetch('mot', fetchMOT(registration), registration) });
+	if (config.apis.vin.enabled) tasks.push({ name: 'vin', promise: timedFetch('vin', fetchVIN(registration), registration) });
 	
 	// no authentication, so enabled by default
-	tasks.push({ name: 'euro', promise: fetchEuro(registration) });
-	tasks.push({ name: 'hpi', promise: fetchAT(registration) });
+	tasks.push({ name: 'euro', promise: timedFetch('euro', fetchEuro(registration), registration) });
+	tasks.push({ name: 'hpi', promise: timedFetch('hpi', fetchAT(registration), registration) });
 
 	const successful = {}, failed = {}, results = await Promise.allSettled(tasks.map(t => t.promise));
 	results.forEach((result, i) => {
