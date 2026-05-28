@@ -105,7 +105,10 @@ export default {
 			createTaxCost(data?.ves, data?.mot),
 			createMotStatus(data?.ves),
 			processMotDefects(data?.mot?.motTests),
-			createMileageStats(data?.mot?.motTests),
+			createMileageStats(
+				data?.mot?.motTests,
+				data?.ves?.yearOfManufacture || data?.mot?.manufactureYear || data?.mot?.manufactureDate || data?.vin?.plate_lookup?.year
+			),
 		);
 
 		const generateEmbed = (page) => {

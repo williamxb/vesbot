@@ -1,5 +1,13 @@
-export function createMileageStats(motTests) {
+export function createMileageStats(motTests, manufactureYearRaw) {
     if (!motTests || motTests.length === 0) return { mileageSummary: '', currentMileage: 'Unknown', mileageGraphUrl: null };
+
+    let manufactureYear = null;
+    if (manufactureYearRaw) {
+        const match = manufactureYearRaw.toString().match(/\b(19|20)\d{2}\b/);
+        if (match) {
+            manufactureYear = parseInt(match[0], 10);
+        }
+    }
 
     // Filter to only tests with valid odometer readings
     const validTests = motTests
@@ -105,6 +113,15 @@ export function createMileageStats(motTests) {
     const chartLabels = [];
     const chartData = [];
     let lastYear = null;
+    
+    if (manufactureYear && validTests.length > 0) {
+        const oldestTestYear = validTests[0].date.getFullYear();
+        if (manufactureYear < oldestTestYear) {
+            chartLabels.push(manufactureYear.toString());
+            chartData.push(0);
+            lastYear = manufactureYear.toString();
+        }
+    }
     
     for (const test of validTests) {
         const year = test.date.getFullYear().toString();

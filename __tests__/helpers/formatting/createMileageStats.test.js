@@ -70,4 +70,56 @@ describe('createMileageStats', () => {
         const result = createMileageStats(tests);
         expect(result.mileageSummary).toContain(`⚠️ Anomaly Detected: Mileage decreased from 100,000 mi (2022) to 100,000 km (2023)`);
     });
+
+    describe('mileage extrapolation for first 3 years of life', () => {
+        test('extrapolates to year of manufacture at 0 mileage when prior to first MOT', () => {
+            const tests = [
+                { completedDate: '2021-01-01T10:00:00Z', odometerValue: '25000', odometerUnit: 'MI' },
+                { completedDate: '2022-01-01T10:00:00Z', odometerValue: '35000', odometerUnit: 'MI' }
+            ];
+            const result = createMileageStats(tests, 2018);
+            expect(result.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2021', '2022'])));
+            expect(result.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 25000, 35000])));
+        });
+
+        test('handles full date string or string year representation', () => {
+            const tests = [
+                { completedDate: '2021-01-01T10:00:00Z', odometerValue: '25000', odometerUnit: 'MI' }
+            ];
+            
+            const resultDateStr = createMileageStats(tests, '2018-05-12');
+            expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2021'])));
+            expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 25000])));
+
+            const resultYearStr = createMileageStats(tests, '2018');
+            expect(resultYearStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2021'])));
+            expect(resultYearStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 25000])));
+        });
+
+        test('does not extrapolate if manufacture year is equal to or after first MOT', () => {
+            const tests = [
+                { completedDate: '2021-01-01T10:00:00Z', odometerValue: '25000', odometerUnit: 'MI' }
+            ];
+            const resultSame = createMileageStats(tests, 2021);
+            expect(resultSame.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2021'])));
+            expect(resultSame.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([25000])));
+
+            const resultAfter = createMileageStats(tests, 2022);
+            expect(resultAfter.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2021'])));
+            expect(resultAfter.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([25000])));
+        });
+
+        test('does not extrapolate if manufacture year is invalid or not provided', () => {
+            const tests = [
+                { completedDate: '2021-01-01T10:00:00Z', odometerValue: '25000', odometerUnit: 'MI' }
+            ];
+            const resultNull = createMileageStats(tests, null);
+            expect(resultNull.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2021'])));
+            expect(resultNull.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([25000])));
+
+            const resultInvalid = createMileageStats(tests, 'not-a-year');
+            expect(resultInvalid.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2021'])));
+            expect(resultInvalid.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([25000])));
+        });
+    });
 });
