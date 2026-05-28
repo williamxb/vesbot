@@ -36,12 +36,6 @@ async function fetchVehicleData(registration, apiConfig) {
 		}
 	});
 
-	// all APIs have failed - trigger error message
-	if (Object.keys(successful).length === 0) {
-		notify('warning', errors)
-		throw new Error(`All APIs failed for vehicle ${registration}`);
-	}
-	
 	let failedString = '\n';
 
 	if (Object.keys(failed).length !== 0) {
@@ -54,6 +48,11 @@ async function fetchVehicleData(registration, apiConfig) {
 		notify('warning', errors)
 		failedString += `${errorArray.join(", ")} failed`
 	} 
+
+	// all APIs have failed - trigger error message
+	if (Object.keys(successful).length === 0) {
+		throw new Error(`All APIs failed for vehicle ${registration}`);
+	}
 
 	return { data: successful, failed: failedString };
 }
