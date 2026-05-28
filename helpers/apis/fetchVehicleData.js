@@ -5,6 +5,8 @@ import { fetchEuro  } from '#helpers/apis/hpiEuro.js';
 import { fetchAT  } from '#helpers/apis/at.js';
 import { fetchVIN  } from '#helpers/apis/vin.js';
 import config from '#helpers/config.js';
+import logger from '#helpers/logger.js';
+
 
 /**
  * Send requests to enabled APIs and return results
@@ -37,6 +39,14 @@ async function fetchVehicleData(registration) {
 			errors += `**${key}**: ${value}\n`
 			errorArray.push(key)
 		}
+		
+		// Log the explicit failures cleanly for Grafana
+		logger.warn(`One or more APIs failed to fetch data`, { 
+			registration, 
+			failedAPIs: errorArray, 
+			errorDetails: failed 
+		});
+		
 		notify('warning', errors)
 		failedString += `${errorArray.join(", ")} failed`
 	} 

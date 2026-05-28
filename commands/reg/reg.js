@@ -1,4 +1,5 @@
 import { ApplicationIntegrationType, EmbedBuilder, InteractionContextType, SlashCommandBuilder } from 'discord.js';
+import logger from '#helpers/logger.js';
 import { fetchVehicleData } from '#helpers/apis/fetchVehicleData.js';
 import { calculateColour } from '#helpers/formatting/calculateColour.js';
 import { createImportStatus } from '#helpers/formatting/createImportStatus.js';
@@ -36,7 +37,9 @@ export default {
 				.setTitle(`Registration failed validation.`)
 				.addFields({ name: 'Registration', value: registration, inline: true })
 				.setColor(0xff0000);
-			return interaction.editReply({ embeds: [embed] });
+			const message = await interaction.editReply({ embeds: [embed] });
+			logger.warn(`Registration failed validation`, { registration, user: interaction.user.id, guildId: interaction.guildId, messageUrl: message.url });
+			return message;
 		}
 
 		let data, failed;
@@ -45,7 +48,7 @@ export default {
 			data = response.data;
 			failed = response.failed;
 		} catch (error) {
-			console.error(error);
+			logger.error('Error fetching vehicle data', { error: error.stack, registration, user: interaction.user.id, guildId: interaction.guildId });
 			const embed = new EmbedBuilder()
 				.setTitle(`An error occurred fetching vehicle data.`)
 				.setDescription(error.message || `Registration \`${registration}\` could not be processed.`)
@@ -59,7 +62,9 @@ export default {
 				.setTitle(`Vehicle not found.`)
 				.addFields({ name: 'Is the registration correct?', value: registration, inline: true })
 				.setColor(0xffaa00);
-			return interaction.editReply({ embeds: [embed] });
+			const message = await interaction.editReply({ embeds: [embed] });
+			logger.info(`Vehicle not found`, { registration, user: interaction.user.id, guildId: interaction.guildId, messageUrl: message.url });
+			return message;
 		}
 
 		const embedData = {
@@ -118,6 +123,8 @@ export default {
 			.setFooter({ text: `${registration}${failed}` })
 			.setColor(embedData.embedColour);
 
-		return interaction.editReply({ embeds: [embed] });
+		const message = await interaction.editReply({ embeds: [embed] });
+		logger.info(`Successfully processed registration`, { registration, user: interaction.user.id, guildId: interaction.guildId, messageUrl: message.url });
+		return message;
 	},
 };

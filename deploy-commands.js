@@ -3,6 +3,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { REST, Routes } from 'discord.js';
 import config from '#helpers/config.js';
+import logger from '#helpers/logger.js';
 
 const clientId = config.discord.clientId;
 const token = config.discord.token;
@@ -30,7 +31,7 @@ for (const folder of commandFolders) {
 		if ('data' in command && 'execute' in command) {
 			commands.push(command.data.toJSON());
 		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+			logger.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`, { file: filePath });
 		}
 	}
 }
@@ -41,14 +42,14 @@ const rest = new REST().setToken(token);
 // Deploy commands
 (async () => {
 	try {
-		console.log(`Refreshing ${commands.length} commands...`);
+		logger.info(`Refreshing ${commands.length} commands...`, { count: commands.length });
 
 		const data = await rest.put(Routes.applicationCommands(clientId), {
 			body: commands,
 		});
 
-		console.log(`Successfully reloaded ${data.length} commands.`);
+		logger.info(`Successfully reloaded ${data.length} commands.`, { count: data.length });
 	} catch (error) {
-		console.error(error);
+		logger.error(error.message || 'Error deploying commands', { error: error.stack });
 	}
 })();

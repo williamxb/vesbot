@@ -1,3 +1,5 @@
+import logger from '#helpers/logger.js';
+
 class TokenManager {
   constructor(authConfig) {
     this.authUrl = authConfig.authUrl;
@@ -45,7 +47,7 @@ class TokenManager {
       
       return this.token;
     } catch (error) {
-      console.error('Authentication failed:', error.message);
+      logger.error('Authentication failed', { error: error.message });
       throw error;
     }
   }

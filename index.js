@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 // Require the necessary discord.js classes
 import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 import config from '#helpers/config.js';
+import logger from '#helpers/logger.js';
 
 const token = config.discord.token;
 
@@ -32,7 +33,7 @@ for (const folder of commandFolders) {
 		if ('data' in command && 'execute' in command) {
 			client.commands.set(command.data.name, command);
 		} else {
-			console.warn(`[WARNING] The command at ${filePath} is missing a required 'data' or 'execute' property.`);
+			logger.warn(`The command at ${filePath} is missing a required 'data' or 'execute' property.`, { file: filePath });
 		}
 	}
 }
@@ -43,14 +44,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		console.error(`No command matching ${interaction.commandName}`);
+		logger.error(`No command matching ${interaction.commandName}`, { command: interaction.commandName, user: interaction.user.id });
 		return;
 	}
 
 	try {
 		await command.execute(interaction);
 	} catch (error) {
-		console.error(error);
+		logger.error(error.message || 'Error executing command', { 
+			error: error.stack, 
+			command: interaction.commandName, 
+			user: interaction.user.id 
+		});
 		if (interaction.replied || interaction.deferred) {
 			// await interaction.followUp({ content: "There was an error while executing this command!" });
 			await interaction.followUp({ content: error.toString() });
@@ -62,7 +67,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 // When the client is ready, run this code (only once).
 client.once(Events.ClientReady, (readyClient) => {
-	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+	logger.info(`Ready! Logged in as ${readyClient.user.tag}`, { user: readyClient.user.tag });
+
 });
 
 // Log in to Discord with your client's token
