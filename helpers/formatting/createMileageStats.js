@@ -180,8 +180,7 @@ export function createMileageStats(motTests, manufactureYearRaw) {
                     label: 'Actual',
                     data: actualData,
                     borderColor: 'rgb(88, 101, 242)', // Discord Blurple
-                    backgroundColor: 'rgb(36, 36, 41)',
-                    fill: true,
+                    fill: false,
                     borderWidth: 3,
                     pointBackgroundColor: 'rgb(255, 255, 255)',
                     pointRadius: 4
