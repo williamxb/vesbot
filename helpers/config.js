@@ -55,4 +55,9 @@ export default {
 		webhookUrl: process.env.DISCORD_NOTIFICATION_WEBHOOK_URL,
 		enabled: !!process.env.DISCORD_NOTIFICATION_WEBHOOK_URL,
 	},
+	cache: {
+		enabled: process.env.CACHE_ENABLED === 'true',
+		uri: process.env.CACHE_URI || 'sqlite://cache.sqlite',
+		ttlDays: parseInt(process.env.CACHE_TTL_DAYS || '30', 10),
+	},
 };

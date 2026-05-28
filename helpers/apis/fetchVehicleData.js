@@ -6,6 +6,13 @@ import { fetchAT  } from '#helpers/apis/at.js';
 import { fetchVIN  } from '#helpers/apis/vin.js';
 import config from '#helpers/config.js';
 import logger from '#helpers/logger.js';
+import Keyv from 'keyv';
+
+let cache = null;
+if (config.cache.enabled) {
+	cache = new Keyv(config.cache.uri, { ttl: config.cache.ttlDays * 24 * 60 * 60 * 1000 });
+	cache.on('error', err => logger.error('Cache connection error', { error: err.message }));
+}
 
 async function timedFetch(apiName, fetchPromise, registration) {
 	const start = Date.now();
@@ -25,6 +32,25 @@ async function timedFetch(apiName, fetchPromise, registration) {
 	}
 }
 
+async function fetchWithCache(apiName, fetchPromiseFn, registration) {
+	if (!cache || apiName === 'mot') {
+		// Bypass cache if disabled or for MOT (real-time results needed)
+		return timedFetch(apiName, fetchPromiseFn(), registration);
+	}
+	
+	const cacheKey = `${apiName}:${registration}`;
+	const cachedData = await cache.get(cacheKey);
+	
+	if (cachedData) {
+		logger.info(`Cache hit for ${apiName}`, { api: apiName, registration });
+		return cachedData;
+	}
+	
+	const data = await timedFetch(apiName, fetchPromiseFn(), registration);
+	await cache.set(cacheKey, data);
+	return data;
+}
+
 /**
  * Send requests to enabled APIs and return results
  * @param {string} registration Vehicle registration
@@ -33,13 +59,13 @@ async function timedFetch(apiName, fetchPromise, registration) {
 async function fetchVehicleData(registration) {
 	const tasks = [];
 
-	if (config.apis.ves.enabled) tasks.push({ name: 'ves', promise: timedFetch('ves', fetchVES(registration), registration) });
-	if (config.apis.mot.enabled) tasks.push({ name: 'mot', promise: timedFetch('mot', fetchMOT(registration), registration) });
-	if (config.apis.vin.enabled) tasks.push({ name: 'vin', promise: timedFetch('vin', fetchVIN(registration), registration) });
+	if (config.apis.ves.enabled) tasks.push({ name: 'ves', promise: fetchWithCache('ves', () => fetchVES(registration), registration) });
+	if (config.apis.mot.enabled) tasks.push({ name: 'mot', promise: fetchWithCache('mot', () => fetchMOT(registration), registration) });
+	if (config.apis.vin.enabled) tasks.push({ name: 'vin', promise: fetchWithCache('vin', () => fetchVIN(registration), registration) });
 	
 	// no authentication, so enabled by default
-	tasks.push({ name: 'euro', promise: timedFetch('euro', fetchEuro(registration), registration) });
-	tasks.push({ name: 'hpi', promise: timedFetch('hpi', fetchAT(registration), registration) });
+	tasks.push({ name: 'euro', promise: fetchWithCache('euro', () => fetchEuro(registration), registration) });
+	tasks.push({ name: 'hpi', promise: fetchWithCache('hpi', () => fetchAT(registration), registration) });
 
 	const successful = {}, failed = {}, results = await Promise.allSettled(tasks.map(t => t.promise));
 	results.forEach((result, i) => {
