@@ -1,4 +1,5 @@
 const TokenManager = require('../auth/vin');
+const config = require('../config');
 
 /**
  * Fetch VIN from VIN API
@@ -7,10 +8,10 @@ const TokenManager = require('../auth/vin');
  */
 async function fetchVIN(registration) {
   const tokenManager = new TokenManager({
-    authUrl: process.env.VIN_AUTH_URL,
+    authUrl: config.apis.vin.authUrl,
     credentials: {
-      login: process.env.VIN_USERNAME,
-      password: process.env.VIN_PASSWORD
+      login: config.apis.vin.username,
+      password: config.apis.vin.password
     },
     refreshBuffer: 60000
   });
@@ -22,7 +23,7 @@ async function fetchVIN(registration) {
 
 	const body = `{"country":"UK","plate":"${registration}","state":"false"}`;
 
-	const response = await tokenManager.fetch(process.env.VIN_URL, { 
+	const response = await tokenManager.fetch(config.apis.vin.url, { 
 		headers, 
 		body, 
 		method: "POST" 

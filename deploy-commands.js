@@ -1,10 +1,10 @@
-require('dotenv').config();
+const config = require('./helpers/config');
 const { REST, Routes } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const clientId = process.env.DISCORD_APP_ID;
-const token = process.env.DISCORD_APP_TOKEN;
+const clientId = config.discord.clientId;
+const token = config.discord.token;
 
 const commands = [];
 // Grab all command folders

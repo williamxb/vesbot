@@ -1,4 +1,3 @@
-// require('dotenv').config();
 const { InteractionContextType, SlashCommandBuilder, EmbedBuilder, ApplicationIntegrationType } = require('discord.js');
 const { validateRegistration } = require('../../helpers/validation/validateRegistration');
 const { sanitiseInput } = require('../../helpers/validation/sanitiseInput');
@@ -13,6 +12,7 @@ const { createVehicleStatus } = require('../../helpers/formatting/createVehicleS
 const { createVehicleYear } = require('../../helpers/formatting/createVehicleYear');
 const { fetchVehicleData } = require('../../helpers/apis/fetchVehicleData');
 const { processMotDefects } = require('../../helpers/mot');
+const config = require('../../helpers/config');
 
 // Embed builder and command handler
 module.exports = {
@@ -40,14 +40,9 @@ module.exports = {
 			return interaction.editReply({ embeds: [embed] });
 		}
 
-		const apiConfig = {
-			vesApiKey: process.env.VES_API_KEY,
-			motApiKey: process.env.MOT_API_KEY,
-		};
-
 		let data, failed;
 		try {
-			const response = await fetchVehicleData(registration, apiConfig);
+			const response = await fetchVehicleData(registration);
 			data = response.data;
 			failed = response.failed;
 		} catch (error) {

@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
+const config = require('./config');
 
 /**
  * Notification functionality - sends Discord webhook to predefined endpoint.
@@ -6,7 +7,8 @@ const { EmbedBuilder } = require('discord.js');
  * @param {string} message Error message
  */
 function notify(severity, message) {
-	const notificationUrl = process.env.DISCORD_NOTIFICATION_WEBHOOK_URL;
+	if (!config.notifications.enabled) return;
+	const notificationUrl = config.notifications.webhookUrl;
 	let colour = '';
 	switch (severity) {
 		case 'critical':

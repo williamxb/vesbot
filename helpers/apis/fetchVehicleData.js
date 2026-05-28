@@ -4,36 +4,28 @@ const { fetchMOT } = require('./dvsaMOT');
 const { fetchEuro } = require('./hpiEuro');
 const { fetchAT } = require('./at');
 const { fetchVIN } = require('./vin');
+const config = require('../config');
 
 /**
- *
+ * Send requests to enabled APIs and return results
  * @param {string} registration Vehicle registration
- * @param {Object} apiConfig API keys
- * @returns {Promise<Object>} Successful API responses and statuses
+ * @returns {Promise<Object>} Successful API responses and failure statuses
  */
-async function fetchVehicleData(registration, apiConfig) {
-	const { vesApiKey, motApiKey } = apiConfig;
+async function fetchVehicleData(registration) {
+	const tasks = [];
 
-	const results = await Promise.allSettled([
-		fetchVES(registration, vesApiKey),
-		fetchMOT(registration, motApiKey),
-		fetchEuro(registration),
-		fetchAT(registration),
-		fetchVIN(registration),
-	]);
+	if (config.apis.ves.enabled) tasks.push({ name: 'ves', promise: fetchVES(registration) });
+	if (config.apis.mot.enabled) tasks.push({ name: 'mot', promise: fetchMOT(registration) });
+	if (config.apis.vin.enabled) tasks.push({ name: 'vin', promise: fetchVIN(registration) });
+	
+	// no authentication, so enabled by default
+	tasks.push({ name: 'euro', promise: fetchEuro(registration) });
+	tasks.push({ name: 'hpi', promise: fetchAT(registration) });
 
-	// Create objects for API results
-	const successful = {};
-	const failed = {};
-
+	const successful = {}, failed = {}, results = await Promise.allSettled(tasks.map(t => t.promise));
 	results.forEach((result, i) => {
-		const apiName = ['ves', 'mot', 'euro', 'hpi', 'vin'];
-
-		if (result.status === 'fulfilled') {
-			successful[apiName[i]] = result.value;
-		} else {
-			failed[apiName[i]] = result.reason.toString()
-		}
+		const apiName = tasks[i].name;
+		result.status === 'fulfilled' ? successful[apiName] = result.value : failed[apiName] = result.reason.toString();
 	});
 
 	let failedString = '\n';
