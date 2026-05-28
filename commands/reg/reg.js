@@ -53,8 +53,8 @@ module.exports = {
 		} catch (error) {
 			console.error(error);
 			const embed = new EmbedBuilder()
-				.setTitle(`An error occured fetching vehicle data.`)
-				.setDescription(`Registration \`${registration}\` was not found.`)
+				.setTitle(`An error occurred fetching vehicle data.`)
+				.setDescription(error.message || `Registration \`${registration}\` could not be processed.`)
 				.setColor(0xffaa00);
 			return interaction.editReply({ embeds: [embed] });
 		}
