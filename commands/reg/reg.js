@@ -10,6 +10,7 @@ import { createTaxCost } from '#helpers/formatting/createTaxCost.js';
 import { createTaxStatus } from '#helpers/formatting/createTaxStatus.js';
 import { createVehicleStatus } from '#helpers/formatting/createVehicleStatus.js';
 import { createVehicleYear } from '#helpers/formatting/createVehicleYear.js';
+import { createMileageStats } from '#helpers/formatting/createMileageStats.js';
 import { processMotDefects } from '#helpers/mot.js';
 import { sanitiseInput } from '#helpers/validation/sanitiseInput.js';
 import { validateRegistration } from '#helpers/validation/validateRegistration.js';
@@ -82,6 +83,7 @@ export default {
 			motStatus: '', // calculated
 			motDue: '', // calculated
 			motDefectsSummary: '', //calculated
+			mileageSummary: '', // calculated
 			vehicleStatus: '', // calculated
 			taxCost: '', // calculated
 			lezTitle: '', // calculated
@@ -101,6 +103,7 @@ export default {
 			createTaxCost(data?.ves, data?.mot),
 			createMotStatus(data?.ves),
 			processMotDefects(data?.mot?.motTests),
+			createMileageStats(data?.mot?.motTests),
 		);
 
 		const embedFields = [
@@ -115,6 +118,10 @@ export default {
 			{ name: 'MOT Expiry', value: embedData.motDue, inline: true },
 			{ name: embedData.lezTitle, value: embedData.lezStatus, inline: true },
 		];
+
+		if (embedData.mileageSummary) {
+			embedFields.splice(3, 0, { name: 'Mileage History', value: embedData.mileageSummary, inline: false });
+		}
 
 		const embed = new EmbedBuilder()
 			.setTitle(`${embedData.colour} ${embedData.year}${embedData.make} ${embedData.model}`)
