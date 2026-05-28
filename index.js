@@ -1,24 +1,33 @@
-const config = require('./helpers/config');
-const fs = require('node:fs');
-const path = require('node:path');
-
+import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 // Require the necessary discord.js classes
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
+import config from '#helpers/config.js';
+
 const token = config.discord.token;
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.commands = new Collection();
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const foldersPath = path.join(import.meta.dirname, 'commands');
+const commandFolders = fs
+	.readdirSync(foldersPath, { withFileTypes: true })
+	.filter((dirent) => dirent.isDirectory())
+	.map((dirent) => dirent.name);
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
 	const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
+
+		// Use dynamic import for ESM
+		const fileUrl = pathToFileURL(filePath).href;
+		const commandModule = await import(fileUrl);
+		const command = commandModule.default || commandModule;
+
 		// Set a new item in the Collection with the key as the command name and the value as the exported module
 		if ('data' in command && 'execute' in command) {
 			client.commands.set(command.data.name, command);

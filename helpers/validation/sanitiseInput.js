@@ -7,4 +7,4 @@ function sanitiseInput(input) {
 	return input.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 }
 
-module.exports = { sanitiseInput }
+export { sanitiseInput };

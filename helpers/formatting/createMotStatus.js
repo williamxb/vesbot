@@ -1,4 +1,4 @@
-const { formatDistance, compareDesc, startOfDay } = require('date-fns');
+import { formatDistance, compareDesc, startOfDay  } from 'date-fns';
 
 /**
  * Create MOT status
@@ -33,4 +33,4 @@ function createMotStatus(vehicle) {
 	return { motStatus: motStatus, motDue: motDue };
 }
 
-module.exports = { createMotStatus }
+export { createMotStatus };

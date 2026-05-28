@@ -1,5 +1,5 @@
-const { getAccessToken } = require('../auth/msal');
-const config = require('../config');
+import { getAccessToken  } from '#helpers/auth/msal.js';
+import config from '#helpers/config.js';
 
 /**
  * Fetch vehicle data from DVSA MOT API
@@ -24,4 +24,4 @@ async function fetchMOT(registration) {
 	return await response.json();
 }
 
-module.exports = { fetchMOT }
+export { fetchMOT };

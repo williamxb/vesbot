@@ -9,4 +9,4 @@ function createImportStatus(vehicle) {
 	return { isImported: '' };
 }
 
-module.exports = { createImportStatus }
+export { createImportStatus };

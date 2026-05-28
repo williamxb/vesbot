@@ -1,5 +1,5 @@
-const { EmbedBuilder } = require('discord.js');
-const config = require('./config');
+import { EmbedBuilder } from 'discord.js';
+import config from '#helpers/config.js';
 
 /**
  * Notification functionality - sends Discord webhook to predefined endpoint.
@@ -48,4 +48,4 @@ function notify(severity, message) {
 	});
 }
 
-module.exports = { notify };
+export { notify };

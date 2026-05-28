@@ -10,4 +10,4 @@ function validateRegistration(registration) {
 	return regex.test(registration);
 }
 
-module.exports = { validateRegistration }
+export { validateRegistration };

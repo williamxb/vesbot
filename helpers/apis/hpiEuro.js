@@ -28,4 +28,4 @@ async function fetchEuro(registration) {
 	return await data;
 }
 
-module.exports = { fetchEuro }
+export { fetchEuro };

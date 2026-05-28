@@ -1,4 +1,4 @@
-const { formatDistance, compareDesc, startOfDay } = require('date-fns');
+import { formatDistance, compareDesc, startOfDay  } from 'date-fns';
 
 /**
  * Create vehicle tax status
@@ -35,4 +35,4 @@ function createTaxStatus(vehicle) {
   return { taxStatus: taxStatus, taxDue: taxDue };
 }
 
-module.exports = { createTaxStatus }
+export { createTaxStatus };

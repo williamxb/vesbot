@@ -1,4 +1,4 @@
-const { formatDistance, format } = require('date-fns');
+import { formatDistance, format  } from 'date-fns';
 
 /**
  * Create last V5C issue date
@@ -14,4 +14,4 @@ function createLastV5(vehicle) {
   return { lastV5: `${formatDistance(lastV5Date, currentDate, { addSuffix: true })}\n${format(lastV5Date, 'dd/MM/yyyy')}`};
 }
 
-module.exports = { createLastV5 }
+export { createLastV5 };

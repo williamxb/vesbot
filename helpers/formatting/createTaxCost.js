@@ -1,4 +1,4 @@
-const { add, isBefore, startOfDay } = require('date-fns');
+import { add, isBefore, startOfDay  } from 'date-fns';
 
 /**
  * VED rates for calculating vehicle tax cost
@@ -105,4 +105,4 @@ function createTaxCost(ves, mot) {
 	return { taxCost: engineCapacity >= 1549 ? RATES.PRE_2001_LARGE_ENGINE : RATES.PRE_2001_SMALL_ENGINE}
 }
 
-module.exports = { createTaxCost, RATES, DATES }
+export { createTaxCost, RATES, DATES };

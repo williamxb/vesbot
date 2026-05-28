@@ -1,5 +1,5 @@
-const msal = require('@azure/msal-node');
-const appConfig = require('../config');
+import * as msal from '@azure/msal-node';
+import appConfig from '#helpers/config.js';
 
 const config = {
 	auth: {
@@ -21,6 +21,6 @@ async function getAccessToken() {
 	return response.accessToken;
 }
 
-module.exports = {
+export {
 	getAccessToken,
 };

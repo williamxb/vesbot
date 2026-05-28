@@ -1,5 +1,5 @@
-const TokenManager = require('../auth/vin');
-const config = require('../config');
+import TokenManager from '#helpers/auth/vin.js';
+import config from '#helpers/config.js';
 
 /**
  * Fetch VIN from VIN API
@@ -44,4 +44,4 @@ async function fetchVIN(registration) {
 	return data.plate_lookup;
 }
 
-module.exports = { fetchVIN }
+export { fetchVIN };

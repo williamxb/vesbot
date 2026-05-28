@@ -1,4 +1,5 @@
-const { createTaxStatus } = require('/helpers/formatting/createTaxStatus');
+import { jest } from '@jest/globals';
+import { createTaxStatus  } from '#helpers/formatting/createTaxStatus.js';
 
 
 describe('createTaxStatus', () => {
@@ -10,7 +11,7 @@ describe('createTaxStatus', () => {
 
   describe('should handle missing inputs', () => {
     test('should handle missing input', () => {
-      ves = {};
+      const ves = {};
       const result = createTaxStatus(ves);
       expect(result).toStrictEqual({
         taxDue: 'Unknown',
@@ -19,7 +20,7 @@ describe('createTaxStatus', () => {
     });
 
     test('should handle missing taxStatus', () => {
-      ves = {
+      const ves = {
         // taxStatus: 'Taxed', test missing taxStatus
         taxDueDate: '2026-11-01',
         motStatus: 'Valid',
@@ -44,7 +45,7 @@ describe('createTaxStatus', () => {
     });
 
     test('should handle missing taxDueDate', () => {
-      ves = {
+      const ves = {
         taxStatus: 'Taxed',
         // taxDueDate: '2026-11-01', test missing taxDueDate
         motStatus: 'Valid',
@@ -70,7 +71,7 @@ describe('createTaxStatus', () => {
   });
 
   test('should handle vehicles on SORN', () => {
-    ves = {
+    const ves = {
       taxStatus: 'SORN',
       taxDueDate: '2026-11-01',
       motStatus: 'Valid',
@@ -95,7 +96,7 @@ describe('createTaxStatus', () => {
   });
 
   test('should handle taxed vehicles', () => {
-    ves = {
+    const ves = {
       taxStatus: 'Valid',
       taxDueDate: '2026-11-01',
       motStatus: 'Valid',
@@ -120,7 +121,7 @@ describe('createTaxStatus', () => {
   });
 
   test('should handle untaxed vehicles', () => {
-    ves = {
+    const ves = {
       taxStatus: 'Untaxed',
       taxDueDate: '2025-10-13',
       motStatus: 'Valid',
@@ -145,7 +146,7 @@ describe('createTaxStatus', () => {
   });
 
   test('should handle vehicle with tax expiring today', () => {
-    ves = {
+    const ves = {
       taxStatus: 'Taxed',
       taxDueDate: '2025-10-17',
       motStatus: 'Valid',

@@ -1,10 +1,10 @@
-const { notify } = require('../notify');
-const { fetchVES } = require('./dvlaVES');
-const { fetchMOT } = require('./dvsaMOT');
-const { fetchEuro } = require('./hpiEuro');
-const { fetchAT } = require('./at');
-const { fetchVIN } = require('./vin');
-const config = require('../config');
+import { notify  } from '#helpers/notify.js';
+import { fetchVES  } from '#helpers/apis/dvlaVES.js';
+import { fetchMOT  } from '#helpers/apis/dvsaMOT.js';
+import { fetchEuro  } from '#helpers/apis/hpiEuro.js';
+import { fetchAT  } from '#helpers/apis/at.js';
+import { fetchVIN  } from '#helpers/apis/vin.js';
+import config from '#helpers/config.js';
 
 /**
  * Send requests to enabled APIs and return results
@@ -49,4 +49,4 @@ async function fetchVehicleData(registration) {
 	return { data: successful, failed: failedString };
 }
 
-module.exports = { fetchVehicleData }
+export { fetchVehicleData };

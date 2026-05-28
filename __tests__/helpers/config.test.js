@@ -1,14 +1,11 @@
-jest.mock('dotenv', () => ({
-    config: jest.fn()
-}));
+import { jest } from '@jest/globals';
+
+jest.unstable_mockModule('dotenv/config.js', () => ({}));
 
 describe('Config Module', () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
-        // Clear require cache so config.js is evaluated fresh each time
-        jest.resetModules();
-        // Clone original env to avoid leaking between tests
         process.env = { ...originalEnv };
     });
 
@@ -16,25 +13,25 @@ describe('Config Module', () => {
         process.env = originalEnv;
     });
 
-    it('should fail fast if DISCORD_APP_TOKEN is missing', () => {
+    it('should fail fast if DISCORD_APP_TOKEN is missing', async () => {
         delete process.env.DISCORD_APP_TOKEN;
         process.env.DISCORD_APP_ID = '12345';
         
-        expect(() => require('../../helpers/config')).toThrow(
+        await expect(import('#helpers/config.js?test=1')).rejects.toThrow(
             'CRITICAL: Missing required environment variables: DISCORD_APP_TOKEN'
         );
     });
 
-    it('should fail fast with multiple missing critical variables', () => {
+    it('should fail fast with multiple missing critical variables', async () => {
         delete process.env.DISCORD_APP_TOKEN;
         delete process.env.DISCORD_APP_ID;
         
-        expect(() => require('../../helpers/config')).toThrow(
+        await expect(import('#helpers/config.js?test=2')).rejects.toThrow(
             'CRITICAL: Missing required environment variables: DISCORD_APP_TOKEN, DISCORD_APP_ID'
         );
     });
 
-    it('should load successfully and set proper API toggle flags when all env vars are present', () => {
+    it('should load successfully and set proper API toggle flags when all env vars are present', async () => {
         process.env.DISCORD_APP_TOKEN = 'token';
         process.env.DISCORD_APP_ID = 'id';
         
@@ -51,7 +48,8 @@ describe('Config Module', () => {
         process.env.VIN_USERNAME = 'vin-user';
         process.env.VIN_PASSWORD = 'vin-password';
 
-        const config = require('../../helpers/config');
+        const configModule = await import('#helpers/config.js?test=3');
+        const config = configModule.default;
 
         expect(config.apis.ves.enabled).toBe(true);
         expect(config.apis.mot.enabled).toBe(true);
@@ -61,7 +59,7 @@ describe('Config Module', () => {
         expect(config.discord.clientId).toBe('id');
     });
 
-    it('should disable APIs if their config is partially or fully missing', () => {
+    it('should disable APIs if their config is partially or fully missing', async () => {
         process.env.DISCORD_APP_TOKEN = 'token';
         process.env.DISCORD_APP_ID = 'id';
         
@@ -81,7 +79,8 @@ describe('Config Module', () => {
         delete process.env.VIN_USERNAME;
         delete process.env.VIN_PASSWORD;
 
-        const config = require('../../helpers/config');
+        const configModule = await import('#helpers/config.js?test=4');
+        const config = configModule.default;
 
         expect(config.apis.ves.enabled).toBe(false);
         expect(config.apis.mot.enabled).toBe(false);

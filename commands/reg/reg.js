@@ -1,21 +1,20 @@
-const { InteractionContextType, SlashCommandBuilder, EmbedBuilder, ApplicationIntegrationType } = require('discord.js');
-const { validateRegistration } = require('../../helpers/validation/validateRegistration');
-const { sanitiseInput } = require('../../helpers/validation/sanitiseInput');
-const { calculateColour } = require('../../helpers/formatting/calculateColour');
-const { createImportStatus } = require('../../helpers/formatting/createImportStatus');
-const { createLastV5 } = require('../../helpers/formatting/createLastV5');
-const { createLEZCompliance } = require('../../helpers/formatting/createLEZCompliance');
-const { createMotStatus } = require('../../helpers/formatting/createMotStatus');
-const { createTaxCost } = require('../../helpers/formatting/createTaxCost');
-const { createTaxStatus } = require('../../helpers/formatting/createTaxStatus');
-const { createVehicleStatus } = require('../../helpers/formatting/createVehicleStatus');
-const { createVehicleYear } = require('../../helpers/formatting/createVehicleYear');
-const { fetchVehicleData } = require('../../helpers/apis/fetchVehicleData');
-const { processMotDefects } = require('../../helpers/mot');
-const config = require('../../helpers/config');
+import { ApplicationIntegrationType, EmbedBuilder, InteractionContextType, SlashCommandBuilder } from 'discord.js';
+import { fetchVehicleData } from '#helpers/apis/fetchVehicleData.js';
+import { calculateColour } from '#helpers/formatting/calculateColour.js';
+import { createImportStatus } from '#helpers/formatting/createImportStatus.js';
+import { createLastV5 } from '#helpers/formatting/createLastV5.js';
+import { createLEZCompliance } from '#helpers/formatting/createLEZCompliance.js';
+import { createMotStatus } from '#helpers/formatting/createMotStatus.js';
+import { createTaxCost } from '#helpers/formatting/createTaxCost.js';
+import { createTaxStatus } from '#helpers/formatting/createTaxStatus.js';
+import { createVehicleStatus } from '#helpers/formatting/createVehicleStatus.js';
+import { createVehicleYear } from '#helpers/formatting/createVehicleYear.js';
+import { processMotDefects } from '#helpers/mot.js';
+import { sanitiseInput } from '#helpers/validation/sanitiseInput.js';
+import { validateRegistration } from '#helpers/validation/validateRegistration.js';
 
 // Embed builder and command handler
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('reg')
 		.setDescription('Check vehicle details and status')

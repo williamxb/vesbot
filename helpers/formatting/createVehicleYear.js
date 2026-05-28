@@ -12,4 +12,4 @@ function createVehicleYear(data) {
 	return { year: output };
 }
 
-module.exports = { createVehicleYear }
+export { createVehicleYear };

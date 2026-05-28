@@ -1,4 +1,5 @@
-const { createMotStatus } = require('/helpers/formatting/createMotStatus');
+import { jest } from '@jest/globals';
+import { createMotStatus  } from '#helpers/formatting/createMotStatus.js';
 
 describe('createMotStatus', () => {
   beforeEach(() => {
@@ -9,7 +10,7 @@ describe('createMotStatus', () => {
 
   describe('should handle missing inputs', () => {
     test('should handle missing input', () => {
-      ves = {};
+      const ves = {};
       const result = createMotStatus(ves);
       expect(result).toStrictEqual({
         motDue: 'Unknown',
@@ -18,7 +19,7 @@ describe('createMotStatus', () => {
     });
 
     test('should handle missing motStatus', () => {
-      ves = {
+      const ves = {
         taxStatus: 'Taxed',
         taxDueDate: '2026-11-01',
         // motStatus: 'Valid', test missing motStatus
@@ -43,7 +44,7 @@ describe('createMotStatus', () => {
     });
 
     test('should handle missing motExpiryDate', () => {
-      ves = {
+      const ves = {
         taxStatus: 'Taxed',
         taxDueDate: '2026-11-01',
         motStatus: 'Valid',
@@ -69,7 +70,7 @@ describe('createMotStatus', () => {
   });
 
   test('should handle vehicles with current MOT', () => {
-    ves = {
+    const ves = {
       taxStatus: 'Valid',
       taxDueDate: '2026-11-01',
       motStatus: 'Valid',
@@ -94,7 +95,7 @@ describe('createMotStatus', () => {
   });
 
   test('should handle vehicles MOT expiring today', () => {
-    ves = {
+    const ves = {
       taxStatus: 'Valid',
       taxDueDate: '2026-11-01',
       motStatus: 'Valid',
@@ -119,7 +120,7 @@ describe('createMotStatus', () => {
   });
 
   test('should handle vehicles with expired MOT', () => {
-    ves = {
+    const ves = {
       taxStatus: 'Untaxed',
       taxDueDate: '2025-10-13',
       motStatus: 'Not valid',

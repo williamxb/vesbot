@@ -1,4 +1,4 @@
-const { createTaxCost, RATES } = require('/helpers/formatting/createTaxCost');
+import { createTaxCost, RATES  } from '#helpers/formatting/createTaxCost.js';
 
 /**
  * @param {Number} co2 
@@ -96,8 +96,8 @@ describe('createTaxCost', () => {
   });
 
   test('lower rate PLG', () => {
-    const mot = {},
-      ves = {
+    const mot = {};
+      const ves = {
         taxStatus: 'SORN',
         motStatus: 'Valid',
         make: 'BMW',
@@ -119,8 +119,8 @@ describe('createTaxCost', () => {
 
   describe('imported vehicle', () => {
     test('higher rate PLG', () => {
-      const mot = {},
-        ves = {
+      const mot = {};
+      const ves = {
           taxStatus: 'SORN',
           motStatus: 'Valid',
           make: 'BMW',
@@ -141,7 +141,7 @@ describe('createTaxCost', () => {
     });
   
     test('should fall back to PLG if co2Emissions unknown', () => {
-      ves = {
+      const ves = {
         taxStatus: 'Taxed',
         taxDueDate: '2026-08-01',
         motStatus: 'Valid',
