@@ -1,5 +1,19 @@
-const { createTaxCost } = require('/helpers/formatting/createTaxCost');
+const { createTaxCost, RATES } = require('/helpers/formatting/createTaxCost');
 
+/**
+ * @param {Number} co2 
+ * @returns {Object} taxCost object to be used in tests
+ */
+const getRate = (co2) => ({ taxCost: `£${RATES.POST_2001_BANDS.find(r => co2 <= r.co2).rate}` });
+
+/**
+ * @param {Number} co2 
+ * @returns {Object} taxCost object to be used in tests between 2001-2006, to handle Band K cap
+ */
+const getRateCapped = (co2) => {
+  const r = RATES.POST_2001_BANDS.find(r => co2 <= r.co2).rate;
+  return { taxCost: r > RATES.BAND_K_CAP ? RATES.BAND_K_CAP_TEXT : `£${r}` };
+};
 
 describe('createTaxCost', () => {
   test('should return unknown if tax status unavailable', () => {
@@ -78,7 +92,7 @@ describe('createTaxCost', () => {
       motTests: [],
     };
     const result = createTaxCost(ves, mot);
-    expect(result).toStrictEqual({ taxCost: '£215' });
+    expect(result).toStrictEqual(getRate(149));
   });
 
   test('lower rate PLG', () => {
@@ -100,7 +114,7 @@ describe('createTaxCost', () => {
         monthOfFirstDvlaRegistration: '2025-10',
       };
     const result = createTaxCost(ves, mot);
-    expect(result).toStrictEqual({ taxCost: '£360' });
+    expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_LARGE_ENGINE });
   });
 
   describe('imported vehicle', () => {
@@ -123,7 +137,7 @@ describe('createTaxCost', () => {
           monthOfFirstDvlaRegistration: '2025-10',
         };
       const result = createTaxCost(ves, mot);
-      expect(result).toStrictEqual({ taxCost: '£220' });
+      expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_SMALL_ENGINE });
     });
   
     test('should fall back to PLG if co2Emissions unknown', () => {
@@ -146,7 +160,7 @@ describe('createTaxCost', () => {
         monthOfFirstRegistration: '2012-04',
       };
       const result = createTaxCost(ves);
-      expect(result).toStrictEqual({ taxCost: '£360' });
+      expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_LARGE_ENGINE });
     });
 
   })
@@ -183,7 +197,7 @@ describe('createTaxCost', () => {
         monthOfFirstRegistration: '2018-09',
       };
       const result = createTaxCost(ves, mot);
-      expect(result).toStrictEqual({ taxCost: '£195' });
+      expect(result).toStrictEqual({ taxCost: RATES.POST_2017_FLAT });
     });
 
     test('should show luxury tax as vehicle is newer than 5 years', () => {
@@ -197,40 +211,40 @@ describe('createTaxCost', () => {
         engineSize: '2143',
       };
       const result = createTaxCost(ves, mot);
-      expect(result).toStrictEqual({ taxCost: '£195 / £620' });
+      expect(result).toStrictEqual({ taxCost: RATES.POST_2017_FLAT_ECS });
     });
   });
 
   describe('vehicle is <2017 && >2001', () => {
     test.each`
       co2    | expected
-      ${80}  | ${{ taxCost: '£20' }}
-      ${100} | ${{ taxCost: '£20' }}
-      ${101} | ${{ taxCost: '£20' }}
-      ${110} | ${{ taxCost: '£20' }}
-      ${111} | ${{ taxCost: '£35' }}
-      ${120} | ${{ taxCost: '£35' }}
-      ${121} | ${{ taxCost: '£165' }}
-      ${130} | ${{ taxCost: '£165' }}
-      ${131} | ${{ taxCost: '£195' }}
-      ${140} | ${{ taxCost: '£195' }}
-      ${141} | ${{ taxCost: '£215' }}
-      ${150} | ${{ taxCost: '£215' }}
-      ${151} | ${{ taxCost: '£265' }}
-      ${165} | ${{ taxCost: '£265' }}
-      ${166} | ${{ taxCost: '£315' }}
-      ${175} | ${{ taxCost: '£315' }}
-      ${176} | ${{ taxCost: '£345' }}
-      ${185} | ${{ taxCost: '£345' }}
-      ${186} | ${{ taxCost: '£395' }}
-      ${200} | ${{ taxCost: '£395' }}
-      ${201} | ${{ taxCost: '£430' }}
-      ${225} | ${{ taxCost: '£430' }}
-      ${226} | ${{ taxCost: '£735' }}
-      ${255} | ${{ taxCost: '£735' }}
-      ${256} | ${{ taxCost: '£760' }}
-      ${299} | ${{ taxCost: '£760' }}
-      ${499} | ${{ taxCost: '£760' }}
+      ${80} | ${getRate(80)}
+      ${100} | ${getRate(100)}
+      ${101} | ${getRate(101)}
+      ${110} | ${getRate(110)}
+      ${111} | ${getRate(111)}
+      ${120} | ${getRate(120)}
+      ${121} | ${getRate(121)}
+      ${130} | ${getRate(130)}
+      ${131} | ${getRate(131)}
+      ${140} | ${getRate(140)}
+      ${141} | ${getRate(141)}
+      ${150} | ${getRate(150)}
+      ${151} | ${getRate(151)}
+      ${165} | ${getRate(165)}
+      ${166} | ${getRate(166)}
+      ${175} | ${getRate(175)}
+      ${176} | ${getRate(176)}
+      ${185} | ${getRate(185)}
+      ${186} | ${getRate(186)}
+      ${200} | ${getRate(200)}
+      ${201} | ${getRate(201)}
+      ${225} | ${getRate(225)}
+      ${226} | ${getRate(226)}
+      ${255} | ${getRate(255)}
+      ${256} | ${getRate(256)}
+      ${299} | ${getRate(299)}
+      ${499} | ${getRate(499)}
     `('should return correct cost for each band', ({ co2, expected }) => {
       const ves = {
         engineCapacity: 4799,
@@ -244,33 +258,33 @@ describe('createTaxCost', () => {
     describe('vehicle is <2006 && >2001', () => {
       test.each`
         co2    | expected
-        ${80}  | ${{ taxCost: '£20' }}
-        ${100} | ${{ taxCost: '£20' }}
-        ${101} | ${{ taxCost: '£20' }}
-        ${110} | ${{ taxCost: '£20' }}
-        ${111} | ${{ taxCost: '£35' }}
-        ${120} | ${{ taxCost: '£35' }}
-        ${121} | ${{ taxCost: '£165' }}
-        ${130} | ${{ taxCost: '£165' }}
-        ${131} | ${{ taxCost: '£195' }}
-        ${140} | ${{ taxCost: '£195' }}
-        ${141} | ${{ taxCost: '£215' }}
-        ${150} | ${{ taxCost: '£215' }}
-        ${151} | ${{ taxCost: '£265' }}
-        ${165} | ${{ taxCost: '£265' }}
-        ${166} | ${{ taxCost: '£315' }}
-        ${175} | ${{ taxCost: '£315' }}
-        ${176} | ${{ taxCost: '£345' }}
-        ${185} | ${{ taxCost: '£345' }}
-        ${186} | ${{ taxCost: '£395' }}
-        ${200} | ${{ taxCost: '£395' }}
-        ${201} | ${{ taxCost: '£430' }}
-        ${225} | ${{ taxCost: '£430' }}
-        ${226} | ${{ taxCost: '£430 (Band K cap)' }}
-        ${255} | ${{ taxCost: '£430 (Band K cap)' }}
-        ${256} | ${{ taxCost: '£430 (Band K cap)' }}
-        ${299} | ${{ taxCost: '£430 (Band K cap)' }}
-        ${499} | ${{ taxCost: '£430 (Band K cap)' }}
+        ${80} | ${getRateCapped(80)}
+        ${100} | ${getRateCapped(100)}
+        ${101} | ${getRateCapped(101)}
+        ${110} | ${getRateCapped(110)}
+        ${111} | ${getRateCapped(111)}
+        ${120} | ${getRateCapped(120)}
+        ${121} | ${getRateCapped(121)}
+        ${130} | ${getRateCapped(130)}
+        ${131} | ${getRateCapped(131)}
+        ${140} | ${getRateCapped(140)}
+        ${141} | ${getRateCapped(141)}
+        ${150} | ${getRateCapped(150)}
+        ${151} | ${getRateCapped(151)}
+        ${165} | ${getRateCapped(165)}
+        ${166} | ${getRateCapped(166)}
+        ${175} | ${getRateCapped(175)}
+        ${176} | ${getRateCapped(176)}
+        ${185} | ${getRateCapped(185)}
+        ${186} | ${getRateCapped(186)}
+        ${200} | ${getRateCapped(200)}
+        ${201} | ${getRateCapped(201)}
+        ${225} | ${getRateCapped(225)}
+        ${226} | ${getRateCapped(226)}
+        ${255} | ${getRateCapped(255)}
+        ${256} | ${getRateCapped(256)}
+        ${299} | ${getRateCapped(299)}
+        ${499} | ${getRateCapped(499)}
       `('should return correct cost for each band', ({ co2, expected }) => {
         const ves = {
           engineCapacity: 4799,
@@ -294,7 +308,7 @@ describe('createTaxCost', () => {
         // engineSize: '2143', test missing engineSize
       };
       const result = createTaxCost(ves, mot);
-      expect(result).toStrictEqual({ taxCost: '£360' });
+      expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_LARGE_ENGINE });
     });
 
     test('should handle VES missing engine capacity', () => {
@@ -307,7 +321,7 @@ describe('createTaxCost', () => {
         engineSize: '2143',
       };
       const result = createTaxCost(ves, mot);
-      expect(result).toStrictEqual({ taxCost: '£360' });
+      expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_LARGE_ENGINE });
     });
 
     test('should return unknown if engine capacity is missing(ALL)', () => {
@@ -333,7 +347,7 @@ describe('createTaxCost', () => {
         engineSize: '2999',
       };
       const result = createTaxCost(ves, mot);
-      expect(result).toStrictEqual({ taxCost: '£360' });
+      expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_LARGE_ENGINE });
     });
 
     test('should return correct cost for < 1548cc ', () => {
@@ -346,13 +360,13 @@ describe('createTaxCost', () => {
         engineSize: '999',
       };
       const result = createTaxCost(ves, mot);
-      expect(result).toStrictEqual({ taxCost: '£220' });
+      expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_SMALL_ENGINE });
     });
   });
 
   describe('should handle cutoff dates correctly', () => {
     describe('1 April 2017', () => {
-      test('should handle 2017-01-04 correctly', () => {
+      test('should handle 2017-04-01 correctly', () => {
         const ves = {
           engineCapacity: 2143,
           co2Emissions: 999,
@@ -363,10 +377,10 @@ describe('createTaxCost', () => {
           engineSize: '2143',
         };
         const result = createTaxCost(ves, mot);
-        expect(result).toStrictEqual({ taxCost: '£195' });
+        expect(result).toStrictEqual({ taxCost: RATES.POST_2017_FLAT });
       });
 
-      test('should handle 2017-03-30 correctly', () => {
+      test('should handle 2017-03-31 correctly', () => {
         const ves = {
           engineCapacity: 2143,
           co2Emissions: 999,
@@ -377,12 +391,12 @@ describe('createTaxCost', () => {
           engineSize: '2143',
         };
         const result = createTaxCost(ves, mot);
-        expect(result).toStrictEqual({ taxCost: '£760' });
+        expect(result).toStrictEqual({ taxCost: getRate(999).taxCost });
       });
     });
 
     describe('1 March 2001', () => {
-      test('should handle 2017-01-04 correctly', () => {
+      test('should handle 2017-04-01 correctly', () => {
         const ves = {
           engineCapacity: 2143,
           co2Emissions: 999,
@@ -393,7 +407,7 @@ describe('createTaxCost', () => {
           engineSize: '2143',
         };
         const result = createTaxCost(ves, mot);
-        expect(result).toStrictEqual({ taxCost: '£430 (Band K cap)' });
+        expect(result).toStrictEqual({ taxCost: RATES.BAND_K_CAP_TEXT });
       });
 
       test('should handle 2001-02-28 correctly (large engine)', () => {
@@ -407,7 +421,7 @@ describe('createTaxCost', () => {
           engineSize: '2143',
         };
         const result = createTaxCost(ves, mot);
-        expect(result).toStrictEqual({ taxCost: '£360' });
+        expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_LARGE_ENGINE });
       });
 
       test('should handle 2001-02-28 correctly (small engine)', () => {
@@ -421,7 +435,7 @@ describe('createTaxCost', () => {
           engineSize: '2143',
         };
         const result = createTaxCost(ves, mot);
-        expect(result).toStrictEqual({ taxCost: '£220' });
+        expect(result).toStrictEqual({ taxCost: RATES.PRE_2001_SMALL_ENGINE });
       });
     });
   });

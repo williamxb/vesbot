@@ -4,28 +4,38 @@ const { add, isBefore, startOfDay } = require('date-fns');
  * VED rates for calculating vehicle tax cost
  * @TODO: add tax bands to response and testing
  */
-const vedRates = [
-	{ co2: 100, band: 'A', rate: 20 },
-	{ co2: 110, band: 'B', rate: 20 },
-	{ co2: 120, band: 'C', rate: 35 },
-	{ co2: 130, band: 'D', rate: 170 },
-	{ co2: 140, band: 'E', rate: 200 },
-	{ co2: 150, band: 'F', rate: 225 },
-	{ co2: 165, band: 'G', rate: 275 },
-	{ co2: 175, band: 'H', rate: 325 },
-	{ co2: 185, band: 'I', rate: 360 },
-	{ co2: 200, band: 'J', rate: 410 },
-	{ co2: 225, band: 'K', rate: 445 },
-	{ co2: 255, band: 'L', rate: 760 },
-	{ co2: 999, band: 'M', rate: 790 },
-];
+const RATES = {
+	POST_2017_FLAT: '£200',
+	POST_2017_FLAT_ECS: '£200 / £640',
+	BAND_K_CAP: 445,
+	BAND_K_CAP_TEXT: '£445 (Band K cap)',
+	POST_2001_BANDS: [
+		{ co2: 100, band: 'A', rate: 20 },
+		{ co2: 110, band: 'B', rate: 20 },
+		{ co2: 120, band: 'C', rate: 35 },
+		{ co2: 130, band: 'D', rate: 170 },
+		{ co2: 140, band: 'E', rate: 200 },
+		{ co2: 150, band: 'F', rate: 225 },
+		{ co2: 165, band: 'G', rate: 275 },
+		{ co2: 175, band: 'H', rate: 325 },
+		{ co2: 185, band: 'I', rate: 360 },
+		{ co2: 200, band: 'J', rate: 410 },
+		{ co2: 225, band: 'K', rate: 445 },
+		{ co2: 255, band: 'L', rate: 760 },
+		{ co2: 999, band: 'M', rate: 790 },
+	],
+	PRE_2001_LARGE_ENGINE: '£375',
+	PRE_2001_SMALL_ENGINE: '£230',
+};
 
 /**
  * Cutoff dates for different VED calculations
  */
-const CUTOFF_2017 = startOfDay(new Date('2017-04-01'));
-const CUTOFF_2006 = startOfDay(new Date('2006-03-23'));
-const CUTOFF_2001 = startOfDay(new Date('2001-03-01'));
+const DATES = {
+	CUTOFF_2017: startOfDay(new Date('2017-04-01')),
+	CUTOFF_2006: startOfDay(new Date('2006-03-23')),
+	CUTOFF_2001: startOfDay(new Date('2001-03-01')),
+};
 
 /**
  * Create registration date
@@ -50,7 +60,7 @@ function parseRegistrationDate(mot, ves) {
  * @returns {string} VED cost
  */
 function getVedRate(co2Emissions) {
-	const rate = vedRates.find(r => co2Emissions <= r.co2);
+	const rate = RATES.POST_2001_BANDS.find(r => co2Emissions <= r.co2);
 	return rate?.rate;
 }
 
@@ -70,20 +80,21 @@ function createTaxCost(ves, mot) {
 	const engineCapacity = ves?.engineCapacity || mot?.engineSize;
 
 	// Post-2017: flat rate
-	if (!isBefore(registrationDate, CUTOFF_2017)) {
+	if (!isBefore(registrationDate, DATES.CUTOFF_2017)) {
 		const vedECSDateThreshold = add(registrationDate, { years: 5 });
+		
 		const hasVedECS = isBefore(startOfDay(new Date()), vedECSDateThreshold);
-		return { taxCost: hasVedECS ? '£200 / £640' : '£200'}
+		return { taxCost: hasVedECS ? RATES.POST_2017_FLAT_ECS : RATES.POST_2017_FLAT}
 	}
 
 	// Post-2001: co2 based
-	if (!isBefore(registrationDate, CUTOFF_2001) && co2Emissions) {
+	if (!isBefore(registrationDate, DATES.CUTOFF_2001) && co2Emissions) {
 		let rate = getVedRate(co2Emissions)
 		if (!rate) return { taxCost: 'Unknown' }
 
 		// Pre-2006: Band K cap
-		if (isBefore(registrationDate, CUTOFF_2006) && rate > 445) {
-			return { taxCost: '£445 (Band K cap)' }
+		if (isBefore(registrationDate, DATES.CUTOFF_2006) && rate > RATES.BAND_K_CAP) {
+			return { taxCost: RATES.BAND_K_CAP_TEXT }
 		}
 
 		return { taxCost: `£${rate}` }
@@ -91,7 +102,7 @@ function createTaxCost(ves, mot) {
 
 	// Pre-2001 or grey import: engine capacity based
 	if (!engineCapacity) return { taxCost: 'Unknown' }
-	return { taxCost: engineCapacity >= 1549 ? '£375' : '£230'}
+	return { taxCost: engineCapacity >= 1549 ? RATES.PRE_2001_LARGE_ENGINE : RATES.PRE_2001_SMALL_ENGINE}
 }
 
-module.exports = { createTaxCost }
+module.exports = { createTaxCost, RATES, DATES }
