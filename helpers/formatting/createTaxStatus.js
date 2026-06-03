@@ -1,4 +1,4 @@
-import { formatDistance, compareDesc, startOfDay  } from 'date-fns';
+import { formatDistance, compareDesc, startOfDay } from 'date-fns';
 
 /**
  * Create vehicle tax status
@@ -6,33 +6,32 @@ import { formatDistance, compareDesc, startOfDay  } from 'date-fns';
  * @returns {string} description of tax status
  */
 function createTaxStatus(vehicle) {
-  if (!vehicle?.taxStatus) return { taxStatus: 'Unknown', taxDue: 'Unknown' };
+  // Tax status not known
+  if (!vehicle?.taxStatus) return { taxTitle: 'Tax status unknown', taxStatus: 'Status is unavailable' };
+  // SORN
+  if (vehicle?.taxStatus === 'SORN') return { taxTitle: '⚠️ SORN', taxStatus: 'Vehicle is off the road' };
 
-  const taxStatus = vehicle.taxStatus;
-  let taxDue = 'Unknown';
-  
-  if (vehicle.taxDueDate) {
+  const taxTitle = vehicle.taxStatus === 'Taxed' ? '✅ Tax valid' : '❌ Tax expired';
+  let taxStatus = '';
+
+  if (vehicle.taxDueDate) { // we have a last due date, so can calculate expiration
     const currentDate = startOfDay(new Date());
     const taxDueDate = startOfDay(new Date(vehicle.taxDueDate));
 
     switch (compareDesc(taxDueDate, currentDate)) {
       case -1: // current
-        taxDue = `Expires ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
+        taxStatus = `Expires ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
         break;
       case 0:
-        taxDue = `Expires today`;
+        taxStatus = `Expires today`;
         break;
       case 1: // expired
-        taxDue = `Expired ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
+        taxStatus = `Expired ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
         break;
     }
-  } else {
-    taxDue = 'Unknown';
   }
 
-  if (taxStatus === 'SORN') taxDue = 'N/A';
-
-  return { taxStatus: taxStatus, taxDue: taxDue };
+  return { taxTitle: taxTitle, taxStatus: taxStatus };
 }
 
 export { createTaxStatus };
