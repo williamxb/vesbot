@@ -72,12 +72,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
 client.once(Events.ClientReady, (readyClient) => {
 	logger.info(`Ready! Logged in as ${readyClient.user.tag}`, { user: readyClient.user.tag });
 
-	// Log Discord Gateway Heartbeat every 5 minutes
+	// Log Discord Gateway Heartbeat every 10 minutes
 	setInterval(() => {
 		if (client.ws.ping !== -1) {
 			logger.info('Discord Gateway Heartbeat', { gatewayPingMs: client.ws.ping });
 		}
-	}, 300000);
+	}, 600000);
 });
 
 // Log in to Discord with your client's token
