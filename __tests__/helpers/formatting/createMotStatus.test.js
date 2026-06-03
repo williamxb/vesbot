@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { createMotStatus  } from '#helpers/formatting/createMotStatus.js';
+import { createMotStatus } from '#helpers/formatting/createMotStatus.js';
 
 describe('createMotStatus', () => {
   beforeEach(() => {

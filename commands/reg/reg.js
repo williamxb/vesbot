@@ -8,6 +8,7 @@ import {
 	InteractionContextType,
 	SlashCommandBuilder,
 } from 'discord.js';
+// helpers
 import { fetchVehicleData } from '#helpers/apis/fetchVehicleData.js';
 import { calculateColour } from '#helpers/formatting/calculateColour.js';
 import { createImportStatus } from '#helpers/formatting/createImportStatus.js';
@@ -15,14 +16,16 @@ import { createLastV5 } from '#helpers/formatting/createLastV5.js';
 import { createLEZCompliance } from '#helpers/formatting/createLEZCompliance.js';
 import { createMileageStats } from '#helpers/formatting/createMileageStats.js';
 import { createMotStatus } from '#helpers/formatting/createMotStatus.js';
+import { createPowertrain } from '#helpers/formatting/createPowertrain.js';
 import { createTaxCost } from '#helpers/formatting/createTaxCost.js';
 import { createTaxStatus } from '#helpers/formatting/createTaxStatus.js';
 import { createVehicleStatus } from '#helpers/formatting/createVehicleStatus.js';
 import { createVehicleYear } from '#helpers/formatting/createVehicleYear.js';
-import logger from '#helpers/logger.js';
 import { processMotDefects } from '#helpers/mot.js';
 import { sanitiseInput } from '#helpers/validation/sanitiseInput.js';
 import { validateRegistration } from '#helpers/validation/validateRegistration.js';
+// logger
+import logger from '#helpers/logger.js';
 
 // Embed builder and command handler
 export default {
@@ -97,25 +100,33 @@ export default {
 			model: data?.hpi?.model || data?.mot?.model || data?.vin?.model || 'Unknown Model',
 			trim: data?.hpi?.derivativeShort || data?.vin?.description || 'No trim level found',
 			colour: calculateColour(data?.ves?.colour) || '',
-			fuelType: data?.mot?.fuelType || data?.ves?.fuelType || 'Unknown',
 			vin: data?.vin?.vin ? `\`${data.vin.vin}\`` : 'Unknown', // wrap in backticks
+			powertrain: '', // calculated
 			lastV5: '', // calculated
 			year: '', // calculated
 			isImported: '', // calculated
+			taxTitle: '', // calculated
 			taxStatus: '', // calculated
-			taxDue: '', // calculated
+			motTitle: '', // calculated
 			motStatus: '', // calculated
-			motDue: '', // calculated
 			motDefectsSummary: '', //calculated
 			mileageSummary: '', // calculated
 			currentMileage: '', // calculated
-			mileageGraphUrl: null, // calculated
+			mileageGraphUrl: '', // calculated
 			vehicleStatus: '', // calculated
 			taxCost: '', // calculated
 			lezTitle: '', // calculated
 			lezStatus: '', // calculated
 			embedColour: '', // calculated
 		};
+
+		const mileageStats = await createMileageStats(
+			data?.mot?.motTests,
+			data?.ves?.yearOfManufacture ||
+			data?.mot?.manufactureYear ||
+			data?.mot?.manufactureDate ||
+			data?.vin?.plate_lookup?.year,
+		);
 
 		// Assign calculated data
 		Object.assign(
@@ -127,15 +138,10 @@ export default {
 			createLEZCompliance(data),
 			createTaxStatus(data?.ves),
 			createTaxCost(data?.ves, data?.mot),
-			createMotStatus(data?.ves),
+			createMotStatus(data?.ves, data?.mot),
+			createPowertrain(data),
 			processMotDefects(data?.mot?.motTests),
-			createMileageStats(
-				data?.mot?.motTests,
-				data?.ves?.yearOfManufacture ||
-					data?.mot?.manufactureYear ||
-					data?.mot?.manufactureDate ||
-					data?.vin?.plate_lookup?.year,
-			),
+			mileageStats,
 		);
 
 		const generateEmbed = (page) => {
@@ -147,12 +153,10 @@ export default {
 
 			if (page === 'overview') {
 				embed.addFields([
-					{ name: 'Vehicle Status', value: embedData.vehicleStatus, inline: true },
-					{ name: 'Tax Status', value: embedData.taxStatus, inline: true },
-					{ name: 'MOT Status', value: embedData.motStatus, inline: true },
-					{ name: embedData.lezTitle, value: embedData.lezStatus, inline: true },
-					{ name: 'Tax Expiry', value: embedData.taxDue, inline: true },
-					{ name: 'MOT Expiry', value: embedData.motDue, inline: true },
+					{ name: 'Vehicle Status', value: embedData.vehicleStatus },
+					{ name: embedData.taxTitle || 'Tax Status', value: embedData.taxStatus },
+					{ name: embedData.motTitle || 'MOT Status', value: embedData.motStatus },
+					{ name: embedData.lezTitle || 'LEZ Status', value: embedData.lezStatus },
 				]);
 				if (embedData.currentMileage && embedData.currentMileage !== 'Unknown') {
 					embed.addFields([{ name: 'Last Known Mileage', value: embedData.currentMileage, inline: true }]);
@@ -161,12 +165,12 @@ export default {
 				embed.addFields([
 					{ name: 'VIN', value: embedData.vin, inline: true },
 					{ name: 'Last V5C', value: embedData.lastV5, inline: true },
-					{ name: 'Fuel Type', value: embedData.fuelType, inline: true },
+					{ name: 'Powertrain', value: embedData.powertrain },
 					{ name: 'Tax Cost', value: embedData.taxCost, inline: true },
 				]);
 			} else if (page === 'history') {
 				if (embedData.mileageSummary) {
-					embed.addFields([{ name: 'Mileage Analytics', value: embedData.mileageSummary, inline: false }]);
+					embed.addFields([{ name: 'Mileage History', value: embedData.mileageSummary, inline: false }]);
 				}
 				embed.addFields([
 					{ name: 'Last 5 years MOT Defects', value: embedData.motDefectsSummary || 'No MOT defects', inline: false },
@@ -215,7 +219,7 @@ export default {
 		collector.on('collect', async (i) => {
 			// Ensure only the user who ran the command can use the buttons
 			if (i.user.id !== interaction.user.id) {
-				await i.reply({ content: 'These buttons are not for you!', ephemeral: true });
+				await i.reply({ content: 'These buttons are not for you! Run the command yourself to enable interactivity.', ephemeral: true });
 				return;
 			}
 			currentPage = i.customId;
@@ -245,8 +249,8 @@ export default {
 					.setDisabled(true),
 			);
 			const expiredEmbed = generateEmbed(currentPage);
-			expiredEmbed.setFooter({ text: `${registration}${failed} | Buttons expired, resend command to interact` });
-			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => {});
+			expiredEmbed.setFooter({ text: `${registration}${failed} \n\nButtons expired, resend command to interact` });
+			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => { });
 		});
 
 		return message;

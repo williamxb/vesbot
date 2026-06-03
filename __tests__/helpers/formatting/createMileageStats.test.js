@@ -18,7 +18,7 @@ describe('createMileageStats', () => {
             { completedDate: '2024-01-01T10:00:00Z', odometerValue: '112000', odometerUnit: 'MI' }, // gap: 2k
             { completedDate: '2025-01-01T10:00:00Z', odometerValue: '127000', odometerUnit: 'MI' }  // gap: 15k
         ];
-        
+
         const result = createMileageStats(tests);
         expect(result.currentMileage).toBe('127,000 mi');
         expect(result.mileageSummary).toContain(`🏎️ Current: 127,000 mi`);
@@ -30,11 +30,11 @@ describe('createMileageStats', () => {
 
     test('detects blatant tampering anomaly', () => {
         const tests = [
-            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' }, 
+            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' },
             { completedDate: '2023-01-01T10:00:00Z', odometerValue: '60000', odometerUnit: 'MI' }, // Clocked
             { completedDate: '2024-01-01T10:00:00Z', odometerValue: '70000', odometerUnit: 'MI' },
         ];
-        
+
         const result = createMileageStats(tests);
         expect(result.mileageSummary).toContain(`🏎️ Current: 70,000 mi`);
         expect(result.mileageSummary).toContain(`⚠️ Anomaly Detected: Mileage decreased from 100,000 mi (2022) to 60,000 mi (2023)`);
@@ -42,10 +42,10 @@ describe('createMileageStats', () => {
 
     test('ignores small typos within buffer', () => {
         const tests = [
-            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' }, 
+            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' },
             { completedDate: '2023-01-01T10:00:00Z', odometerValue: '99500', odometerUnit: 'MI' }, // 500 mile typo, ignored
         ];
-        
+
         const result = createMileageStats(tests);
         expect(result.mileageSummary).not.toContain(`⚠️ Anomaly Detected`);
     });
@@ -55,7 +55,7 @@ describe('createMileageStats', () => {
             { completedDate: '2022-01-01T10:00:00Z', odometerValue: '160000', odometerUnit: 'KM' }, // ~99,419 mi
             { completedDate: '2023-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' }, // Number is smaller, but actual distance is larger!
         ];
-        
+
         const result = createMileageStats(tests);
         expect(result.mileageSummary).not.toContain(`⚠️ Anomaly Detected`);
         expect(result.mileageSummary).toContain(`🏎️ Current: 100,000 mi`);
@@ -63,10 +63,10 @@ describe('createMileageStats', () => {
 
     test('handles real anomaly even with mixed units', () => {
         const tests = [
-            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' }, 
-            { completedDate: '2023-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'KM' }, // ~62,137 miles, this IS a decrease!
+            { completedDate: '2022-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'MI' },
+            { completedDate: '2023-01-01T10:00:00Z', odometerValue: '100000', odometerUnit: 'KM' }, // ~62,137 miles
         ];
-        
+
         const result = createMileageStats(tests);
         expect(result.mileageSummary).toContain(`⚠️ Anomaly Detected: Mileage decreased from 100,000 mi (2022) to 100,000 km (2023)`);
     });
@@ -87,7 +87,7 @@ describe('createMileageStats', () => {
             const tests = [
                 { completedDate: '2021-01-01T10:00:00Z', odometerValue: '25000', odometerUnit: 'MI' }
             ];
-            
+
             const resultDateStr = createMileageStats(tests, '2018-05-12');
             expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify(['2018', '2019', '2020', '2021'])));
             expect(resultDateStr.mileageGraphUrl).toContain(encodeURIComponent(JSON.stringify([0, 8333, 16667, 25000])));

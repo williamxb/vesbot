@@ -1,4 +1,4 @@
-import { isBefore, startOfDay  } from 'date-fns';
+import { isBefore, startOfDay } from 'date-fns';
 
 /**
  * Convert string to TitleCase
@@ -14,14 +14,14 @@ function toTitleCase(str) { return str.toLowerCase().split(' ').map(word => word
  * @returns {Date} registration date
  */
 function parseRegistrationDate(mot, ves) {
-	const dateString = mot?.registrationDate ?? (ves?.monthOfFirstRegistration && `${ves.monthOfFirstRegistration}-01`);
-	
-	// no data, nothing to return
-	if (!dateString) return null;
-	
-	// protect against malforced data - invalid dates detected with isNan
-	const parsedDate = new Date(dateString);
-	return isNaN(parsedDate.getTime()) ? null : parsedDate;
+  const dateString = mot?.registrationDate ?? (ves?.monthOfFirstRegistration && `${ves.monthOfFirstRegistration}-01`);
+
+  // no data, nothing to return
+  if (!dateString) return null;
+
+  // protect against malforced data - invalid dates detected with isNan
+  const parsedDate = new Date(dateString);
+  return isNaN(parsedDate.getTime()) ? null : parsedDate;
 }
 
 /**
@@ -32,14 +32,15 @@ function parseRegistrationDate(mot, ves) {
 function createLEZCompliance(data) {
 
   // fuel type is unknown, unable to calculate LEZ compliance
-  if (!data?.ves?.fuelType && !data?.mot?.fuelType) return { lezTitle: "LEZ ❓", lezStatus: "Unknown" }
+  if (!data?.ves?.fuelType && !data?.mot?.fuelType) return { lezTitle: "⚠️ LEZ", lezStatus: "Cannot determine" }
 
   // ves/mot return TitleCase and UPPERCASE respectively. let's use one standard
   const fuelType = toTitleCase(data?.ves?.fuelType || data?.mot?.fuelType)
 
   // electric/hybrid assumed to be compliant
-  if (fuelType === "Electricity"  || fuelType === "Hybrid Electric") {
-    return { lezTitle: "LEZ ✅", lezStatus: `${fuelType}\nCompliant` }
+  if (fuelType === "Electricity" || fuelType === "Hybrid Electric") {
+    if (fuelType === 'Hybrid Electric') return { lezTitle: "✅ LEZ", lezStatus: `Hybrid\nCompliant` }
+    return { lezTitle: "✅ LEZ", lezStatus: `EV\nCompliant` }
   }
 
   // Use EURO API to calculate LEZ compliance
@@ -50,35 +51,35 @@ function createLEZCompliance(data) {
     if (fuelType === "Petrol") {
       const regex = /[4-6]+/g;
       if (regex.test(euroStatus)) {
-        return { lezTitle: "LEZ ✅", lezStatus: `${euroStatus} ${fuelType}\nCompliant` }
+        return { lezTitle: "✅ LEZ", lezStatus: `${euroStatus} ${fuelType}\nCompliant` }
       } else {
-        return { lezTitle: "LEZ ❌", lezStatus: `${euroStatus} ${fuelType}\nNon-compliant` }
+        return { lezTitle: "❌ LEZ", lezStatus: `${euroStatus} ${fuelType}\nNon-compliant` }
       }
-    } 
+    }
 
     // diesel - Euro 6 are compliant
     if (fuelType === "Diesel") {
       const regex = /[6]+/g;
       if (regex.test(euroStatus)) {
-        return { lezTitle: "LEZ ✅", lezStatus: `${euroStatus} ${fuelType}\nCompliant` }
+        return { lezTitle: "✅ LEZ", lezStatus: `${euroStatus} ${fuelType}\nCompliant` }
       } else {
-        return { lezTitle: "LEZ ❌", lezStatus: `${euroStatus} ${fuelType}\nNon-compliant` }
+        return { lezTitle: "❌ LEZ", lezStatus: `${euroStatus} ${fuelType}\nNon-compliant` }
       }
-    } 
+    }
   }
 
   // EURO API unavailable, but we can still estimate using manufacture date
   const registrationDate = parseRegistrationDate(data?.mot, data?.ves);
 
-	// no registrationDate, LEZ compliance incalculable
-	if (!registrationDate) return { lezTitle: "LEZ ❓", lezStatus: "Unknown" }
+  // no registrationDate, LEZ compliance incalculable
+  if (!registrationDate) return { lezTitle: "LEZ ❓", lezStatus: "Unknown" }
 
   // vehicle manufactured between introduction and enforcement MAY still be compliant
   const CUTOFF_Euro4Introduced = startOfDay(new Date('2005-01-01'));
   const CUTOFF_Euro4Mandatory = startOfDay(new Date('2006-01-01'));
   const CUTOFF_Euro6Introduced = startOfDay(new Date('2015-09-01'));
   const CUTOFF_Euro6Mandatory = startOfDay(new Date('2016-09-01'));
- 
+
   switch (fuelType) {
     case "Petrol":
       if (!isBefore(registrationDate, CUTOFF_Euro4Mandatory)) {
