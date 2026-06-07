@@ -121,9 +121,9 @@ export default {
 		const mileageStats = await createMileageStats(
 			data?.mot?.motTests,
 			data?.ves?.yearOfManufacture ||
-			data?.mot?.manufactureYear ||
-			data?.mot?.manufactureDate ||
-			data?.vin?.plate_lookup?.year,
+				data?.mot?.manufactureYear ||
+				data?.mot?.manufactureDate ||
+				data?.vin?.plate_lookup?.year,
 		);
 
 		// Assign calculated data
@@ -159,7 +159,7 @@ export default {
 				if (embedData.currentMileage && embedData.currentMileage !== 'Unknown') {
 					embed.addFields([{ name: 'Last Known Mileage', value: embedData.currentMileage, inline: true }]);
 				}
-			} else if (page === 'technical') {
+			} else if (page === 'details') {
 				embed.addFields([
 					{ name: 'VIN', value: embedData.vin, inline: true },
 					{ name: 'Last V5C', value: embedData.lastV5, inline: true },
@@ -185,15 +185,15 @@ export default {
 			return new ActionRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('overview')
-					.setLabel('📋 Overview')
+					.setLabel('Overview')
 					.setStyle(currentPage === 'overview' ? ButtonStyle.Primary : ButtonStyle.Secondary),
 				new ButtonBuilder()
-					.setCustomId('technical')
-					.setLabel('🔧 Technical')
-					.setStyle(currentPage === 'technical' ? ButtonStyle.Primary : ButtonStyle.Secondary),
+					.setCustomId('details')
+					.setLabel('Details')
+					.setStyle(currentPage === 'details' ? ButtonStyle.Primary : ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId('history')
-					.setLabel('🛠️ MOT & Mileage')
+					.setLabel('History')
 					.setStyle(currentPage === 'history' ? ButtonStyle.Primary : ButtonStyle.Secondary),
 			);
 		};
