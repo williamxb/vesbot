@@ -1,4 +1,3 @@
-// discord.js
 import {
 	ActionRowBuilder,
 	ApplicationIntegrationType,
@@ -9,7 +8,6 @@ import {
 	InteractionContextType,
 	SlashCommandBuilder,
 } from 'discord.js';
-// helpers
 import { fetchVehicleData } from '#helpers/apis/fetchVehicleData.js';
 import { calculateColour } from '#helpers/formatting/calculateColour.js';
 import { createImportStatus } from '#helpers/formatting/createImportStatus.js';
@@ -22,11 +20,10 @@ import { createTaxCost } from '#helpers/formatting/createTaxCost.js';
 import { createTaxStatus } from '#helpers/formatting/createTaxStatus.js';
 import { createVehicleStatus } from '#helpers/formatting/createVehicleStatus.js';
 import { createVehicleYear } from '#helpers/formatting/createVehicleYear.js';
+import logger from '#helpers/logger.js';
 import { processMotDefects } from '#helpers/mot.js';
 import { sanitiseInput } from '#helpers/validation/sanitiseInput.js';
 import { validateRegistration } from '#helpers/validation/validateRegistration.js';
-// logger
-import logger from '#helpers/logger.js';
 
 // Embed builder and command handler
 export default {
@@ -220,7 +217,10 @@ export default {
 		collector.on('collect', async (i) => {
 			// Ensure only the user who ran the command can use the buttons
 			if (i.user.id !== interaction.user.id) {
-				await i.reply({ content: 'These buttons are not for you! Run the command yourself to enable interactivity.', ephemeral: true });
+				await i.reply({
+					content: 'These buttons are not for you! Run the command yourself to enable interactivity.',
+					ephemeral: true,
+				});
 				return;
 			}
 			currentPage = i.customId;
@@ -251,7 +251,7 @@ export default {
 			);
 			const expiredEmbed = generateEmbed(currentPage);
 			expiredEmbed.setFooter({ text: `${registration}${failed} \n\nButtons expired, resend command to interact` });
-			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => { });
+			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => {});
 		});
 
 		return message;
