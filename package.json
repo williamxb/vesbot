@@ -18,7 +18,7 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "@azure/msal-node": "^5.1",
+    "@azure/msal-node": "^5.2",
     "@keyv/sqlite": "^4.0.8",
     "date-fns": "^4.4",
     "discord.js": "^14",
