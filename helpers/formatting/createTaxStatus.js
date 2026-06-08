@@ -9,9 +9,11 @@ function createTaxStatus(vehicle) {
   // Tax status not known
   if (!vehicle?.taxStatus) return { taxTitle: 'Tax status unknown', taxStatus: 'Status is unavailable' };
   // SORN
-  if (vehicle?.taxStatus === 'SORN') return { taxTitle: '⚠️ SORN', taxStatus: 'Vehicle is off the road' };
+  if (vehicle.taxStatus === 'SORN') return { taxTitle: '⚠️ SORN', taxStatus: 'Vehicle is off the road' };
+  // Not Taxed for on Road Use
+  if (vehicle.taxStatus === 'Not Taxed for on Road Use') return { taxTitle: '⚠️ Off the road', taxStatus: 'Vehicle is not taxed for road use' };
 
-  const taxTitle = vehicle.taxStatus === 'Taxed' ? '✅ Tax valid' : '❌ Tax expired';
+  const taxTitle = vehicle.taxStatus === 'Valid' ? '✅ Tax valid' : '❌ Tax expired';
   let taxStatus = '';
 
   if (vehicle.taxDueDate) { // we have a last due date, so can calculate expiration
@@ -29,6 +31,8 @@ function createTaxStatus(vehicle) {
         taxStatus = `Expired ${formatDistance(taxDueDate, currentDate, { addSuffix: true })}`;
         break;
     }
+  } else {
+    taxStatus = `Could not determine expiry`
   }
 
   return { taxTitle: taxTitle, taxStatus: taxStatus };

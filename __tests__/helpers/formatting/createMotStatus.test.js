@@ -13,8 +13,8 @@ describe('createMotStatus', () => {
       const ves = {};
       const result = createMotStatus(ves);
       expect(result).toStrictEqual({
-        motDue: 'Unknown',
-        motStatus: 'Unknown',
+        motStatus: 'Could not determine expiry',
+        motTitle: '❔ MOT Status Unknown',
       });
     });
 
@@ -38,8 +38,8 @@ describe('createMotStatus', () => {
       };
       const result = createMotStatus(ves);
       expect(result).toStrictEqual({
-        motDue: 'Unknown',
-        motStatus: 'Unknown',
+        motStatus: 'Expires in 2 months',
+        motTitle: '❔ MOT Status Unknown',
       });
     });
 
@@ -63,8 +63,8 @@ describe('createMotStatus', () => {
       };
       const result = createMotStatus(ves);
       expect(result).toStrictEqual({
-        motDue: 'Unknown',
-        motStatus: 'Valid',
+        motStatus: 'Could not determine expiry',
+        motTitle: '✅ MOT Valid'
       });
     });
   });
@@ -89,8 +89,8 @@ describe('createMotStatus', () => {
     };
     const result = createMotStatus(ves);
     expect(result).toStrictEqual({
-      motDue: 'Expires in 2 months',
-      motStatus: 'Valid',
+      motStatus: 'Expires in 2 months',
+      motTitle: '✅ MOT Valid',
     });
   });
 
@@ -114,8 +114,8 @@ describe('createMotStatus', () => {
     };
     const result = createMotStatus(ves);
     expect(result).toStrictEqual({
-      motDue: 'Expires today',
-      motStatus: 'Valid',
+      motStatus: 'Expires today',
+      motTitle: '✅ MOT Valid',
     });
   });
 
@@ -139,8 +139,8 @@ describe('createMotStatus', () => {
     };
     const result = createMotStatus(ves);
     expect(result).toStrictEqual({
-      motDue: 'Expired 11 months ago',
-      motStatus: 'Not valid',
+      motStatus: 'Expired 11 months ago',
+      motTitle: '❌ MOT Expired',
     });
   });
 

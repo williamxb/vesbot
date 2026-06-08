@@ -24,13 +24,10 @@ function createMotStatus(ves, mot) {
 		// missing first MOT
 		if (firstMotDue > new Date() && !ves?.motStatus) return { motTitle: '❌ MOT Expired', motStatus: `${formatDistance(firstMotDue, new Date(), { addSuffix: true })}` };
 	}
-
-	// MOT status not known
-	if (!ves?.motStatus) return { motTitle: 'MOT status unknown', motStatus: 'Status is unavailable' };
-
+	
 	// create title
 	let motTitle = '';
-	switch (ves.motStatus) {
+	switch (ves?.motStatus) {
 		case 'Valid':
 			motTitle = '✅ MOT Valid';
 			break;
@@ -41,7 +38,7 @@ function createMotStatus(ves, mot) {
 			motTitle = '⚠️ No MOT history';
 			break;
 		default:
-			motTitle = 'MOT Status Unknown';
+			motTitle = '❔ MOT Status Unknown';
 			break;
 	}
 

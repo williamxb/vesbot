@@ -72,7 +72,7 @@ function createLEZCompliance(data) {
   const registrationDate = parseRegistrationDate(data?.mot, data?.ves);
 
   // no registrationDate, LEZ compliance incalculable
-  if (!registrationDate) return { lezTitle: "LEZ ❓", lezStatus: "Unknown" }
+  if (!registrationDate) return { lezTitle: "⚠️ LEZ", lezStatus: "Unknown" }
 
   // vehicle manufactured between introduction and enforcement MAY still be compliant
   const CUTOFF_Euro4Introduced = startOfDay(new Date('2005-01-01'));
@@ -84,31 +84,31 @@ function createLEZCompliance(data) {
     case "Petrol":
       if (!isBefore(registrationDate, CUTOFF_Euro4Mandatory)) {
         // Vehicle manufactured on the day of or after Euro 4 was made mandatory
-        return { lezTitle: "LEZ ✅", lezStatus: `Post-Euro 4 ${fuelType}\nCompliant` }
+        return { lezTitle: "✅ LEZ", lezStatus: `Post-Euro 4 ${fuelType}\nCompliant` }
       }
 
       if (!isBefore(registrationDate, CUTOFF_Euro4Introduced)) {
         // Vehicle manufactured on the day of or after Euro 4 was introduced
-        return { lezTitle: "LEZ ✅⚠️", lezStatus: `Euro 3/4 ${fuelType}\nPotentially compliant` }
+        return { lezTitle: "✅⚠️ LEZ", lezStatus: `Euro 3/4 ${fuelType}\nPotentially compliant` }
       }
 
       else {
-        return { lezTitle: "LEZ ❌", lezStatus: `Pre-Euro 4 ${fuelType}\nNon-compliant` }
+        return { lezTitle: "❌ LEZ", lezStatus: `Pre-Euro 4 ${fuelType}\nNon-compliant` }
       }
 
     case "Diesel":
       if (!isBefore(registrationDate, CUTOFF_Euro6Mandatory)) {
         // Vehicle manufactured on the day of or after Euro 6 was made mandatory
-        return { lezTitle: "LEZ ✅", lezStatus: `Post-Euro 6 ${fuelType}\nCompliant` }
+        return { lezTitle: "✅ LEZ", lezStatus: `Post-Euro 6 ${fuelType}\nCompliant` }
       }
 
       if (!isBefore(registrationDate, CUTOFF_Euro6Introduced)) {
         // Vehicle manufactured on the day of or after Euro 6 was introduced
-        return { lezTitle: "LEZ ✅⚠️", lezStatus: `Euro 5/6 ${fuelType}\nPotentially compliant` }
+        return { lezTitle: "✅⚠️ LEZ", lezStatus: `Euro 5/6 ${fuelType}\nPotentially compliant` }
       }
 
       else {
-        return { lezTitle: "LEZ ❌", lezStatus: `Pre-Euro 6 ${fuelType}\nNon-compliant` }
+        return { lezTitle: "❌ LEZ", lezStatus: `Pre-Euro 6 ${fuelType}\nNon-compliant` }
       }
   }
 }
