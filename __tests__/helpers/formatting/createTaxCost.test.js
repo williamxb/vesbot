@@ -23,6 +23,13 @@ describe('createTaxCost', () => {
     expect(result).toStrictEqual({ taxCost: 'Unknown' });
   });
 
+  test('should return Cannot calculate if typeApproval is not M1', () => {
+    const ves = { typeApproval: 'L1e' };
+    const mot = {};
+    const result = createTaxCost(ves, mot);
+    expect(result).toStrictEqual({ taxCost: 'Cannot calculate' });
+  });
+
   test('should return unknown if date of registration is unavailable', () => {
     const ves = {
       taxStatus: 'Taxed',

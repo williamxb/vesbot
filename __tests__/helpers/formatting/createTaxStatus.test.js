@@ -14,14 +14,14 @@ describe('createTaxStatus', () => {
       const ves = {};
       const result = createTaxStatus(ves);
       expect(result).toStrictEqual({
-        taxDue: 'Unknown',
-        taxStatus: 'Unknown',
+        taxStatus: 'Status is unavailable',
+        taxTitle: 'Tax status unknown',
       });
     });
 
     test('should handle missing taxStatus', () => {
       const ves = {
-        // taxStatus: 'Taxed', test missing taxStatus
+        // taxStatus: 'Valid', test missing taxStatus
         taxDueDate: '2026-11-01',
         motStatus: 'Valid',
         make: 'BMW',
@@ -39,14 +39,14 @@ describe('createTaxStatus', () => {
       };
       const result = createTaxStatus(ves);
       expect(result).toStrictEqual({
-        taxDue: 'Unknown',
-        taxStatus: 'Unknown',
+        taxStatus: 'Status is unavailable',
+        taxTitle: 'Tax status unknown',
       });
     });
 
     test('should handle missing taxDueDate', () => {
       const ves = {
-        taxStatus: 'Taxed',
+        taxStatus: 'Valid',
         // taxDueDate: '2026-11-01', test missing taxDueDate
         motStatus: 'Valid',
         make: 'BMW',
@@ -64,8 +64,8 @@ describe('createTaxStatus', () => {
       };
       const result = createTaxStatus(ves);
       expect(result).toStrictEqual({
-        taxDue: 'Unknown',
-        taxStatus: 'Taxed',
+        taxStatus: 'Could not determine expiry',
+        taxTitle: '✅ Tax valid',
       });
     });
   });
@@ -90,8 +90,8 @@ describe('createTaxStatus', () => {
     };
     const result = createTaxStatus(ves);
     expect(result).toStrictEqual({
-      taxDue: 'N/A',
-      taxStatus: 'SORN',
+      taxStatus: "Vehicle is off the road",
+      taxTitle: "⚠️ SORN",
     });
   });
 
@@ -115,8 +115,8 @@ describe('createTaxStatus', () => {
     };
     const result = createTaxStatus(ves);
     expect(result).toStrictEqual({
-      taxDue: 'Expires in about 1 year',
-      taxStatus: 'Valid',
+      taxStatus: 'Expires in about 1 year',
+      taxTitle: '✅ Tax valid',
     });
   });
 
@@ -140,14 +140,14 @@ describe('createTaxStatus', () => {
     };
     const result = createTaxStatus(ves);
     expect(result).toStrictEqual({
-      taxDue: 'Expired 4 days ago',
-      taxStatus: 'Untaxed',
+      taxStatus: 'Expired 4 days ago',
+      taxTitle: '❌ Tax expired',
     });
   });
 
   test('should handle vehicle with tax expiring today', () => {
     const ves = {
-      taxStatus: 'Taxed',
+      taxStatus: 'Valid',
       taxDueDate: '2025-10-17',
       motStatus: 'Valid',
       make: 'MINI',
@@ -165,8 +165,8 @@ describe('createTaxStatus', () => {
     };
     const result = createTaxStatus(ves);
     expect(result).toStrictEqual({
-      taxDue: 'Expires today',
-      taxStatus: 'Taxed',
+      taxStatus: 'Expires today',
+      taxTitle: '✅ Tax valid',
     });
   });
 

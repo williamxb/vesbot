@@ -71,6 +71,10 @@ function getVedRate(co2Emissions) {
  * @returns {string} calculated tax cost
  */
 function createTaxCost(ves, mot) {
+	if (ves?.typeApproval && ves.typeApproval !== 'M1') {
+		return { taxCost: 'Cannot calculate' };
+	}
+
 	const registrationDate = parseRegistrationDate(mot, ves);
 
 	// no registrationDate, VED scheme incalculable
