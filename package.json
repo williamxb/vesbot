@@ -20,7 +20,7 @@
   "dependencies": {
     "@azure/msal-node": "^5.1",
     "@keyv/sqlite": "^4.0.8",
-    "date-fns": "^4.1",
+    "date-fns": "^4.4",
     "discord.js": "^14",
     "dotenv": "^17",
     "keyv": "^5.6.0",
