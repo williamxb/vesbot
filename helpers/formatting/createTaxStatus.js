@@ -13,7 +13,7 @@ function createTaxStatus(vehicle) {
   // Not Taxed for on Road Use
   if (vehicle.taxStatus === 'Not Taxed for on Road Use') return { taxTitle: '⚠️ Off the road', taxStatus: 'Vehicle is not taxed for road use' };
 
-  const taxTitle = vehicle.taxStatus === 'Valid' ? '✅ Tax valid' : '❌ Tax expired';
+  const taxTitle = ['Valid', 'Taxed'].includes(vehicle.taxStatus) ? '✅ Tax valid' : '❌ Tax expired';
   let taxStatus = '';
 
   if (vehicle.taxDueDate) { // we have a last due date, so can calculate expiration

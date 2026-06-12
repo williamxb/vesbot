@@ -24,7 +24,7 @@ function createVehicleStatus(vehicle, registration) {
 		vehicle.qPlate ? '**Q Plate**' : null,
 		vehicle.stolen ? '**Stolen**' : null,
 		vehicle.scrapped ? '**Scrapped**' : null,
-		vehicle.writeOffCategory !== 'none'
+		vehicle.writeOffCategory && vehicle.writeOffCategory !== 'none'
 			? `**Write-off - CAT ${vehicle.writeOffCategory}**`
 			: null,
 	].filter(Boolean);
