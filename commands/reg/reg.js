@@ -274,17 +274,17 @@ export default {
 			const disabledRow = new ActionRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('overview')
-					.setLabel('📋 Overview')
+					.setLabel('Overview')
 					.setStyle(ButtonStyle.Secondary)
 					.setDisabled(true),
 				new ButtonBuilder()
-					.setCustomId('technical')
-					.setLabel('🔧 Technical')
+					.setCustomId('details')
+					.setLabel('Details')
 					.setStyle(ButtonStyle.Secondary)
 					.setDisabled(true),
 				new ButtonBuilder()
 					.setCustomId('history')
-					.setLabel('🛠️ MOT & Mileage')
+					.setLabel('History')
 					.setStyle(ButtonStyle.Secondary)
 					.setDisabled(true),
 			);
