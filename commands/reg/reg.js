@@ -114,15 +114,15 @@ export default {
 			taxCost: '', // calculated
 			lezTitle: '', // calculated
 			lezStatus: '', // calculated
-			embedColour: '', // calculated
+			embedColour: 0x4caf50, // calculated (default green)
 		};
 
 		const mileageStats = await createMileageStats(
 			data?.mot?.motTests,
 			data?.ves?.yearOfManufacture ||
-				data?.mot?.manufactureYear ||
-				data?.mot?.manufactureDate ||
-				data?.vin?.plate_lookup?.year,
+			data?.mot?.manufactureYear ||
+			data?.mot?.manufactureDate ||
+			data?.vin?.plate_lookup?.year,
 		);
 
 		// Assign calculated data
@@ -139,6 +139,49 @@ export default {
 			processMotDefects(data?.mot?.motTests),
 			mileageStats,
 		);
+
+		// Create embed colour
+		let isRed = false;
+		let isAmber = false;
+		const now = new Date();
+		const in30Days = new Date();
+		in30Days.setDate(now.getDate() + 30);
+
+		if (data?.ves) {
+			const ves = data.ves;
+			// Tax
+			if (ves?.taxStatus === 'Not Taxed for on Road Use') isRed = true;
+			else if (ves?.taxStatus === 'SORN') isAmber = true;
+
+			if (ves?.taxDueDate) {
+				const taxDue = new Date(ves.taxDueDate);
+				if (taxDue < now) isRed = true;
+				else if (taxDue < in30Days) isAmber = true;
+			}
+
+			// MOT
+			if (ves?.motStatus === 'Not valid') isRed = true;
+
+			if (ves?.motExpiryDate) {
+				const motDue = new Date(ves.motExpiryDate);
+				if (motDue < now) isRed = true;
+				else if (motDue < in30Days) isAmber = true;
+			} else if (ves?.motStatus === 'No details held by DVLA') {
+				const firstReg = data?.mot?.registrationDate || ves.monthOfFirstRegistration;
+				if (firstReg) {
+					const firstMotDue = new Date(firstReg);
+					firstMotDue.setFullYear(firstMotDue.getFullYear() + 3);
+					if (firstMotDue < now) isRed = true;
+					else if (firstMotDue < in30Days) isAmber = true;
+				}
+			}
+		}
+
+		if (isRed) {
+			embedData.embedColour = 0xe53935; // Red
+		} else if (isAmber) {
+			embedData.embedColour = 0xffb300; // Amber
+		}
 
 		const generateEmbed = (page) => {
 			const embed = new EmbedBuilder()
@@ -248,7 +291,7 @@ export default {
 			);
 			const expiredEmbed = generateEmbed(currentPage);
 			expiredEmbed.setFooter({ text: `${registration}${failed} \n\nButtons expired, resend command to interact` });
-			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => {});
+			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => { });
 		});
 
 		return message;
