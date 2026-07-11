@@ -18,7 +18,6 @@ import { createMotStatus } from '#helpers/formatting/createMotStatus.js';
 import { createPowertrain } from '#helpers/formatting/createPowertrain.js';
 import { createTaxCost } from '#helpers/formatting/createTaxCost.js';
 import { createTaxStatus } from '#helpers/formatting/createTaxStatus.js';
-import { createVehicleStatus } from '#helpers/formatting/createVehicleStatus.js';
 import { createVehicleYear } from '#helpers/formatting/createVehicleYear.js';
 import logger from '#helpers/logger.js';
 import { processMotDefects } from '#helpers/mot.js';
@@ -129,7 +128,6 @@ export default {
 		// Assign calculated data
 		Object.assign(
 			embedData,
-			createVehicleStatus(data?.hpi, registration),
 			createVehicleYear(data),
 			createImportStatus(data?.ves),
 			createLastV5(data?.ves),
@@ -151,7 +149,6 @@ export default {
 
 			if (page === 'overview') {
 				embed.addFields([
-					{ name: 'Vehicle Status', value: embedData.vehicleStatus },
 					{ name: embedData.taxTitle || 'Tax Status', value: embedData.taxStatus },
 					{ name: embedData.motTitle || 'MOT Status', value: embedData.motStatus },
 					{ name: embedData.lezTitle || 'LEZ Status', value: embedData.lezStatus },
