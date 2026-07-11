@@ -110,7 +110,6 @@ export default {
 			mileageSummary: '', // calculated
 			currentMileage: '', // calculated
 			mileageGraphUrl: '', // calculated
-			vehicleStatus: '', // calculated
 			taxCost: '', // calculated
 			lezTitle: '', // calculated
 			lezStatus: '', // calculated
