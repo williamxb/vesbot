@@ -1,9 +1,9 @@
-import { notify  } from '#helpers/notify.js';
-import { fetchVES  } from '#helpers/apis/dvlaVES.js';
-import { fetchMOT  } from '#helpers/apis/dvsaMOT.js';
-import { fetchEuro  } from '#helpers/apis/hpiEuro.js';
-import { fetchAT  } from '#helpers/apis/at.js';
-import { fetchVIN  } from '#helpers/apis/vin.js';
+import { notify } from '#helpers/notify.js';
+import { fetchVES } from '#helpers/apis/dvlaVES.js';
+import { fetchMOT } from '#helpers/apis/dvsaMOT.js';
+import { fetchEuro } from '#helpers/apis/hpiEuro.js';
+import { fetchAT } from '#helpers/apis/at.js';
+import { fetchVIN } from '#helpers/apis/vin.js';
 import config from '#helpers/config.js';
 import logger from '#helpers/logger.js';
 import Keyv from 'keyv';
@@ -33,19 +33,19 @@ async function timedFetch(apiName, fetchPromise, registration) {
 }
 
 async function fetchWithCache(apiName, fetchPromiseFn, registration) {
-	if (!cache || apiName === 'mot') {
-		// Bypass cache if disabled or for MOT (real-time results needed)
+	// VES and MOT APIs change - do not cache
+	if (!cache || apiName === 'mot' || apiName === 'ves') {
 		return timedFetch(apiName, fetchPromiseFn(), registration);
 	}
-	
+
 	const cacheKey = `${apiName}:${registration}`;
 	const cachedData = await cache.get(cacheKey);
-	
+
 	if (cachedData) {
 		logger.info(`Cache hit for ${apiName}`, { api: apiName, registration });
 		return cachedData;
 	}
-	
+
 	const data = await timedFetch(apiName, fetchPromiseFn(), registration);
 	await cache.set(cacheKey, data);
 	return data;
@@ -62,7 +62,7 @@ async function fetchVehicleData(registration) {
 	if (config.apis.ves.enabled) tasks.push({ name: 'ves', promise: fetchWithCache('ves', () => fetchVES(registration), registration) });
 	if (config.apis.mot.enabled) tasks.push({ name: 'mot', promise: fetchWithCache('mot', () => fetchMOT(registration), registration) });
 	if (config.apis.vin.enabled) tasks.push({ name: 'vin', promise: fetchWithCache('vin', () => fetchVIN(registration), registration) });
-	
+
 	// no authentication, so enabled by default
 	tasks.push({ name: 'euro', promise: fetchWithCache('euro', () => fetchEuro(registration), registration) });
 	tasks.push({ name: 'hpi', promise: fetchWithCache('hpi', () => fetchAT(registration), registration) });
@@ -78,21 +78,21 @@ async function fetchVehicleData(registration) {
 	if (Object.keys(failed).length !== 0) {
 		let errors = `**${registration}** \n`;
 		let errorArray = [];
-		for(const [key, value] of Object.entries(failed)) {
+		for (const [key, value] of Object.entries(failed)) {
 			errors += `**${key}**: ${value}\n`
 			errorArray.push(key)
 		}
-		
+
 		// Log the explicit failures cleanly for Grafana
-		logger.warn(`One or more APIs failed to fetch data`, { 
-			registration, 
-			failedAPIs: errorArray, 
-			errorDetails: failed 
+		logger.warn(`One or more APIs failed to fetch data`, {
+			registration,
+			failedAPIs: errorArray,
+			errorDetails: failed
 		});
-		
+
 		notify('warning', errors)
 		failedString += `${errorArray.join(", ")} failed`
-	} 
+	}
 
 	// all APIs have failed - trigger error message
 	if (Object.keys(successful).length === 0) {
