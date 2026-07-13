@@ -119,9 +119,9 @@ export default {
 		const mileageStats = await createMileageStats(
 			data?.mot?.motTests,
 			data?.ves?.yearOfManufacture ||
-			data?.mot?.manufactureYear ||
-			data?.mot?.manufactureDate ||
-			data?.vin?.plate_lookup?.year,
+				data?.mot?.manufactureYear ||
+				data?.mot?.manufactureDate ||
+				data?.vin?.plate_lookup?.year,
 		);
 
 		// Assign calculated data
@@ -290,7 +290,7 @@ export default {
 			);
 			const expiredEmbed = generateEmbed(currentPage);
 			expiredEmbed.setFooter({ text: `${registration}${failed} \n\nButtons expired, resend command to interact` });
-			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => { });
+			interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(() => {});
 		});
 
 		return message;
