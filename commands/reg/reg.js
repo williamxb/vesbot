@@ -166,7 +166,7 @@ export default {
 				if (motDue < now) isRed = true;
 				else if (motDue < in30Days) isAmber = true;
 			} else if (ves?.motStatus === 'No details held by DVLA') {
-				const firstReg = data?.mot?.registrationDate || ves.monthOfFirstRegistration;
+				const firstReg = data?.mot?.registrationDate || ves?.monthOfFirstRegistration;
 				if (firstReg) {
 					const firstMotDue = new Date(firstReg);
 					firstMotDue.setFullYear(firstMotDue.getFullYear() + 3);
