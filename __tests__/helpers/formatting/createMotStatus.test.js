@@ -18,6 +18,30 @@ describe('createMotStatus', () => {
       });
     });
 
+    test('should handle undefined ves input', () => {
+      const result = createMotStatus(undefined);
+      expect(result).toStrictEqual({
+        motStatus: 'Could not determine expiry',
+        motTitle: '❔ MOT Status Unknown',
+      });
+    });
+
+    test('should handle null ves input', () => {
+      const result = createMotStatus(null);
+      expect(result).toStrictEqual({
+        motStatus: 'Could not determine expiry',
+        motTitle: '❔ MOT Status Unknown',
+      });
+    });
+
+    test('should handle undefined ves with mot input', () => {
+      const result = createMotStatus(undefined, { registrationDate: '2023-01-01' });
+      expect(result).toStrictEqual({
+        motStatus: 'Could not determine expiry',
+        motTitle: '❔ MOT Status Unknown',
+      });
+    });
+
     test('should handle missing motStatus', () => {
       const ves = {
         taxStatus: 'Taxed',

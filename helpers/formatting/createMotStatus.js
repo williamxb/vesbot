@@ -44,7 +44,7 @@ function createMotStatus(ves, mot) {
 
 	// create due date
 	let motDue = 'Could not determine expiry'
-	if (ves.motExpiryDate) {
+	if (ves?.motExpiryDate) {
 		const currentDate = startOfDay(new Date());
 		const motExpiryDate = startOfDay(new Date(ves.motExpiryDate));
 
