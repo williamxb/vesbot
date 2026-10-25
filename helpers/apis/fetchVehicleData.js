@@ -6,11 +6,12 @@ import { fetchAT } from '#helpers/apis/at.js';
 import { fetchVIN } from '#helpers/apis/vin.js';
 import config from '#helpers/config.js';
 import logger from '#helpers/logger.js';
+import KeyvSqlite from '@keyv/sqlite';
 import Keyv from 'keyv';
 
 let cache = null;
 if (config.cache.enabled) {
-	cache = new Keyv(config.cache.uri, { ttl: config.cache.ttlDays * 24 * 60 * 60 * 1000 });
+	cache = new Keyv(new KeyvSqlite(config.cache.uri), { ttl: config.cache.ttlDays * 24 * 60 * 60 * 1000 });
 	cache.on('error', err => logger.error('Cache connection error', { error: err.message }));
 }
 

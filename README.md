@@ -20,7 +20,7 @@ A Discord bot for checking UK vehicle details; MOT history, tax status, spurious
 ![](./example.jpg "Example output")
 
 ## Prerequisites
- - Node.js v25, npm
+ - Node.js v26, npm
  - [Discord App](https://discord.com/developers/docs/quick-start/getting-started)
  - Environment tokens set up - see `.env.example`
  - (Optional) Docker for containerised deployment
