@@ -41,6 +41,6 @@
     "outputDirectory": "coverage"
   },
   "optionalDependencies": {
-    "bufferutil": "^4.1.0"
+    "bufferutil": "^4.2.0"
   }
 }
